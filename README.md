@@ -15,6 +15,12 @@ Riding on the shoulders of giants (a.k.a. copied the structure from):
 - Where I write: `<e.g. VS Code + LaTeX Workshop, Overleaf>`
 - Magic command: `<e.g. latexmk -pdf main.tex>`
 
+<p align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=git,kubernetes,docker,c,vim" />
+  </a>
+</p>
+
 ## 🔄 The Ritual (every time I switch devices)
 
 1. `git pull` — grab whatever past-me left behind
