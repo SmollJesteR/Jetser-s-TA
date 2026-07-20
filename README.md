@@ -1,26 +1,26 @@
-# Latex-TA-IF-ITERA
-Template Latex Tugas Akhir untuk Program Studi Teknik Informatika, ITERA
+# 📖 My Thesis Writing Repo
 
-Kontributor: Radhinka Bagaskara, Martin C.T. Manullang, I Wayan Wiprayoga Wisesa, Jose Alfredo Sitanggang (IF 2016), Ardoni Yeriko Rifana Gultom (IF 2021), Syabana Minggus Noviantosa (IF 2018), Rizki Alfaina (IF 2021), Cornelius Linux (2022)
+Here lies my struggle and my triumph in my thesis writing, lmao.
 
-![Screenshot LaTex dari TeXstudio](ss.jpg)
+This is basically my thesis's diary. LaTeX files, progress, and the emotional damage — all synced across every device I write on so future-me doesn't have to start from scratch (again).
 
-## Apakah ini?
+## 🧩 Template
 
-Proyek ini bertujuan untuk membuat template Tugas Akhir Teknik Informatika ITERA berbasis LaTex. Template dibuat berdasarkan template [Pedoman Tugas Akhir Format Terbaru (UNESCO)](https://docs.google.com/document/d/1m2WutVlV-NSbEeZUKMPsThl__LI8m_bd), serta berdasarkan [Templat LaTeX Tesis Informatika ITB](https://github.com/petrabarus/if-itb-latex) oleh Petra Barus & Peb Ruswono Aryan.
+Riding on the shoulders of giants (a.k.a. copied the structure from):
+[rdhnk/Latex-TA-IF-ITERA](https://github.com/rdhnk/Latex-TA-IF-ITERA.git)
 
-## Mengapa memakai LaTex?
+## 🛠️ My Setup
 
-Secara general, **LaTex akan menghasilkan dokumen yang lebih rapi & tingkat skalabilitas yang lebih tinggi dibandingkan dokumen Microsoft Word**. Walaupun begitu, penggunaan LaTex tidak selalu lebih mudah dibandingkan dengan Microsoft Word yang bersifat _what you see is what you get_ (WYSIWYG). Penjelasan sederhana LaTex dapat dilihat pada [slide berikut](https://docs.google.com/presentation/d/16ejeYsVfova5_QQAQxzL2NDmMPekJivV_LQMwEACFoI/edit?usp=sharing).
+- Compiler: `<e.g. TeX Live / MiKTeX>`
+- Where I write: `<e.g. VS Code + LaTeX Workshop, Overleaf>`
+- Magic command: `<e.g. latexmk -pdf main.tex>`
 
-## Bagaimana cara menggunakannya?
+## 🔄 The Ritual (every time I switch devices)
 
-Template dapat didownload dengan mengakses halaman [release](https://github.com/rdhnk/Latex-TA-IF-ITERA/releases). Atau dengan melakukan clone/download zip template. Bukalah file `thesis.tex` dengan menggunakan editor Latex.
+1. `git pull` — grab whatever past-me left behind
+2. Write, cry, write some more
+3. `git commit -m "..."` and log it below too
+4. `git push` — before closing the laptop, no exceptions
 
-## Editor LaTex seperti apa?
+## 📅 Log of Suffering & Small Wins
 
-Template dapat dibuka & dicompile menggunakan editor seperti [TeXstudio](https://www.texstudio.org/) atau [Overleaf](https://www.overleaf.com). Template secara teknis diedit & diuji menggunakan TeXstudio.
-
-## Mengapa ada dua jenis ukuran kertas dalam template ini?
-
-Per Mei 2025, ITERA mengubah standar ukuran kertas Tugas Akhir dari A4 menjadi UNESCO (155 x 230 mm). Untuk ukuran A4, silakan gunakan folder [Template TA 2025 - Versi A4](Template%20TA%202025%20-%20Versi%20A4). **Template utama sudah disesuaikan dengan ukuran UNESCO. Kedepannya, template UNESCO adalah template yang akan diberi update & support.**
