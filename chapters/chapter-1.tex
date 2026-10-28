@@ -2,52 +2,55 @@
 \chapter{PENDAHULUAN} \label{Bab I}
 
 \section{Latar Belakang} \label{I.Latar Belakang}
-Latar Belakang berisi dasar pemikiran, kebutuhan atau alasan yang menjadi ide dari topik tugas akhir. Tujuan utamanya adalah untuk memberikan informasi secukupnya kepada pembaca agar memahami topik yang akan dibahas. Terdapat dua hal yang wajib dikemukakan: \par
+Diagnosis penyakit kulit berbasis citra medis kini bertransisi secara signifikan ke arah paradigma "Deployment-First Medical AI", di mana efisiensi komputasi dan kecepatan inferensi pada perangkat edge menjadi prioritas utama selain akurasi klinis \cite{nguyen2026efficient, mehta2022mobilevit}. Di fasilitas pelayanan kesehatan dengan infrastruktur komputasi terbatas, ketersediaan model kecerdasan buatan yang ringan dan andal sangat krusial untuk membantu klinisi dalam melakukan deteksi dini lesi kulit \cite{lavaei2025resource}.\par
 
-\begin{enumerate}[noitemsep]
-	\item Deskripsi yang luas dan longgar yang berkaitan dengan bidang/masalah di masyarakat, industry dan atau bidang-bidang lainnya. Deskripsi ini mewakili bidang/masalah secara umum yang berkaitan dengan Teknik Informatika, bekerja dan akan terlibat di dalamnya. Sangat disarankan di sini, sebisa mungkin tidak ada Batasan tentang pilihan teknologi yang akan digunakan. Contoh: bidang transportasi, bidang telekomunikasi, bidang Pendidikan, bidang manufaktur, bidang renewable energi, pariwisata, militer, transportasi, kesehatan, pertanian, pengelolaan infrastruktur dan sebagainya.
-	\item Deskripsi lebih khusus dan mendetail yang didapatkan dari poin 1 di atas. Dari deskripsi umum di atas, selanjutkan fokuskan pada fenomena masalah yang akan diangkat. Pendetailan harus mampu membawa masalah kepada masalah yang mennjukkan peran Anda dalam penelitian 
-\end{enumerate}
+Dalam implementasinya, klasifikasi penyakit kulit berbasis Deep Learning dihadapkan pada dua tantangan utama: ketidakseimbangan kelas (class imbalance) yang ekstrem dan keterbatasan sumber daya komputasi \cite{esteva2017dermatologist, litjens2017survey}. Penelitian terdahulu pada dataset DermaMNIST menggunakan model konvensional seperti ResNet-18 dan ResNet-50 \cite{he2016deep} menunjukkan kecenderungan prediksi yang sangat terbias pada kelas mayoritas (Melanocytic Nevi mendominasi hingga $\sim$67\% data), sehingga gagal mengenali kelas-kelas penyakit langka secara akurat \cite{hariz2026analisis}. Di sisi lain, meskipun arsitektur Vision Transformer (ViT) \cite{dosovitskiy2021image, shamshad2022transformers} menawarkan keunggulan dalam menangkap konteks spasial global, kompleksitas komputasi kuadratiknya $\mathcal{O}(N^2)$ terhadap panjang sekuens/resolusi gambar sangat membebani memori VRAM dan daya komputasi perangkat lunak medis \cite{amangeldi2025cnn}.\par
+
+Sebagai terobosan mutakhir, muncul arsitektur berbasis State Space Models (SSM) / Mamba yang menggabungkan lapisan konvolusi untuk fitur lokal dengan selective scan module untuk pemrosesan konteks global ber-kompleksitas linear $\mathcal{O}(N)$ \cite{gu2024mamba}. Salah satu arsitektur pionir di domain medis adalah MedMamba \cite{yue2024medmamba}, yang hadir dalam berbagai skala parameter meliputi MedMamba-T (Tiny, $\sim$14,5M parameter), MedMamba-S (Small, $\sim$22,8M parameter), dan MedMamba-B (Base, $\sim$47,1M parameter). Kehadiran variasi skala ini memungkinkan eksplorasi trade-off antara kapasitas representasi fitur dan efisiensi komputasi \cite{aalishah2025medmambalite}.\par
+
+Namun demikian, validitas ilmiah dari pengembangan model AI medis sangat bergantung pada integritas data yang digunakan. Investigasi kualitas data oleh Abhishek et al. (2025) mengungkapkan ditemukannya kebocoran data (\textit{data leakage}) sebesar \textbf{13,47\%} (1.006 dari 7.470 lesi unik) pada dataset DermaMNIST murni akibat pemisahan data yang tidak terisolasi di tingkat pasien/lesi (\textit{lesion-level split}) \cite{abhishek2025investigating, yang2023medmnist}. Kebocoran ini menyebabkan performa benchmark terinflasi secara semu karena model sekadar "menghafal" lesi pasien yang sama di folder pengujian. Masalah serupa berupa duplikasi dan ketidaksesuaian label juga ditemukan pada dataset Fitzpatrick17k \cite{groh2021evaluating}. Oleh karena itu, penggunaan versi dataset terkoreksi (\textbf{DermaMNIST-C} dan \textbf{Fitzpatrick17k-C}) yang bebas dari kebocoran data sangat mutlak diperlukan.\par
+
+Untuk membangun model diagnostik yang tangguh (\textit{robust}) \cite{disalvo2024medmnistc}, pengujian tidak hanya perlu dilakukan secara \textit{in-dataset}, melainkan juga melalui \textbf{evaluasi lintas-dataset (\textit{cross-dataset generalization})}. Selain itu, paradigma pelatihan juga berkembang dari \textit{Supervised Learning} langsung menuju \textit{Contrastive Learning} untuk mempelajari representasi visual lesi yang lebih kaya tanpa terdistorsi oleh bias label mayoritas \cite{khosla2020supervised}. \par
+
+Berdasarkan urgensi tersebut, penelitian ini dirancang untuk melakukan evaluasi komprehensif terhadap \textbf{skalabilitas dan generalisasi arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B)} pada dataset terkoreksi (DermaMNIST-C dan Fitzpatrick17k-C). Penelitian ini membandingkan skenario pelatihan \textit{Supervised} vs \textit{Contrastive}, menguji dampak \textit{data leakage} secara eksperimental, serta mengeksekusi \textbf{studi ablasi mendalam pada MedMamba-S} sebagai model fokus utama.\par
 
 \section{Rumusan Masalah} \label{I.Rumusan Masalah}
-Merumuskan masalah secara konkrit, bentuk pertanyaan fakta / kebenaran yang masih dipertanyakan \par
-
-Dari pendahuluan di atas, mahasiswa diharapkan dapat memformulasikan masalah engineering yang solid. Masalah yang kemudian akan diformulasi mahasiswa harus terdefinisi dengan baik (harus jelas, tidak ambigu/ada makna ganda, tanpa menggunakan jargon), masalah harus real (benar-benar ada masalah terebut) sehingga nantinya akan ada solusi yang konkrit. Perlu dipertimbangkan juga masalah tersebut harus bisa dipecahkan dalam waktu maksimal 1 semester oleh mahasiswa dengan alokasi waktu per minggu tidak lebih dari 20 jam per minggu. \par
-
-Lebih jelasnya masalah yang diharapkan adalah seperti dalam 3 poin di bawah ini. Jika tidak mengandung semua unsur dibawah maka tugas akhir ini tidak memenuhi syarat sebagai tugas akhir. \par
+Berdasarkan latar belakang yang telah dipaparkan, rumusan masalah dalam penelitian ini adalah sebagai berikut: \par
 
 \begin{enumerate}[noitemsep]
-	\item Harus ada proses perancangan yang utuh dari penentuan masalah real yang perlu dipecahkan, 
-	\item Harus menjelaskan spesifikasi yang akan dibuat
-	\item Harus ada implementasi dalam bentuk salah satu di bawah ini:
-	\begin{enumerate}
-		\item Hardware/perangkat keras
-		\item Software/perangkat lunak
-		\item Proses/simulasi yang dibuat sendiri (Matlab, C/C++, Python, dan lain-lain) bukan melalui software yang murni dan sudah paten dan tinggal memasukkan data (ETAP, EDSA, SPSS, dan lain-lain)
-	\end{enumerate}
+	\item Bagaimana efisiensi komputasi, performa klasifikasi, dan skalabilitas dari keluarga arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) dalam mengklasifikasikan citra penyakit kulit dengan ketidakseimbangan kelas yang ekstrem? 
+	\item Sejauh mana perbedaan efektivitas skenario pelatihan Supervised Learning dibandingkan Contrastive Learning dalam mengekstrak representasi fitur visual lesi kulit yang diskriminatif?
+	\item Bagaimana tingkat keandalan generalisasi lintas-dataset (cross-dataset generalization) dari model MedMamba ketika dilatih dan diuji secara silang antara DermaMNIST-C dan Fitzpatrick17k-C, serta seberapa besar dampak kebocoran data (data leakage) yang terjadi pada dataset DermaMNIST murni (origin)?
+	\item Sejauh mana komponen-komponen utama pada arsitektur fokus MedMamba-S (skema fungsi kerugian/loss, strategi inisialisasi bobot pretrained, dan augmentasi data) berkontribusi terhadap peningkatan performa klasifikasi melalui studi ablasi?
 \end{enumerate}
-
-Hasil rancangan dalam bentuk hardware/software/simulasi tersebut harus diuji dan diverifikasi apakah bekerja dengan baik atau belum Jika belum bekerja baik, mahasiswa harus bisa menjelaskan alasannya dan perbaikannya ke depan (walau pun saat tugas akhir ini selesai, alat/software/simulasi belum bisa bekerja).\par
-
-Selain itu, rumusan sangat disarankan untuk melibatkan pengalaman multidisiplin. Misalnya melibatkan unsur-unsur seperti seni, ekonomi, mekanik, politik, proses kimia, etika, kesehatan, dan sebagainya. Contoh-contoh rumusan masalah yang \textbf{tidak disarankan}: \par
-
-\begin{enumerate}[noitemsep]
-	\item \textbf{Masalah tidak real dan tidak terlalu hipotetis}. Misalnya, topik riset atau topik untuk lomba (contoh: mencari metode paling cepat untuk menentukan posisi kebakaran di dalam hutan).
-	\item Rumusan untuk membuat alat/produk yang \textbf{tidak dapat diimplemetasikan dan diukur/diuji dalam waktu maksimal 2 semester}. Misalnya membuat roket dengan daya jangkau 500 km.
-	\item \textbf{Solusi terlalu kompleks} sehingga dalam satu tahun hanya dapat menghasilkan bagian kecil dari solusi yang diharapkan Rumusan masalah berisi ringkasan fenomena dan masalah.
-\end{enumerate}
-
-Rumusan masalah akan dijawab di \nameref{V.Kesimpulan}. Rumusan Masalah disarankan untuk ditulis per poin.
 
 \section{Tujuan Penelitian} \label{I.Tujuan}
-Tujuan diisikan tujuan dari penelitian yang dilakukan, berdasarkan sub-bab \nameref{I.Latar Belakang} dan \nameref{I.Rumusan Masalah} dilengkapi dengan spesifikasinya. Tuliskan Tujuan sesuai dengan poin Rumusan Masalah. \par
+
+Berdasarkan rumusan masalah yang telah ditetapkan, tujuan penelitian ini adalah sebagai berikut: \par
+
+\begin{enumerate}[noitemsep]
+	\item Mengimplementasikan dan mengevaluasi tiga skala arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) guna memetakan trade-off antara jumlah parameter, penggunaan VRAM, dan akurasi diagnostik. 
+	\item Menerapkan dan menganalisis perbandingan paradigma pelatihan berbasis Supervised Learning dan Contrastive Learning untuk penanganan ketidakseimbangan kelas medis.
+	\item Menguji kemampuan generalisasi model melalui pengujian lintas-dataset (cross-dataset) serta mengkuantifikasi dampak kebocoran data dengan membandingkan evaluasi pada DermaMNIST-origin, DermaMNIST-C, dan Fitzpatrick17k-C.
+	\item Melaksanakan studi ablasi terstruktur pada arsitektur MedMamba-S untuk mengisolasi efek dari skema loss function (Class-Weighted Loss), pre-training initialization, dan strategi augmentasi.
+\end{enumerate}
 
 \section{Batasan Masalah} \label{I.Batasan}
-Batasan yang dimaksud disini ialah batasan dari penelitian tugas akhir yang dilakukan. Batasan masalah ditujukan agar tugas akhir yang dilakukan tidak terlalu luas, dan menjadi lebih realistis untuk diselesaikan. \par
+Berikut adalah batasan yang diberlakukan dalam penelitian ini: \par
+
+\begin{enumerate}[noitemsep]
+    \item Arsitektur model yang dievaluasi berfokus pada keluarga MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B).
+    \item Dataset yang digunakan terbatas pada citra dermatologi publik: DermaMNIST-origin, DermaMNIST-C, dan Fitzpatrick17k-C.
+    \item Evaluasi kinerja mencakup metrik performa klinis (Balanced Accuracy, Macro-F1, MCC), reliabilitas prediksi (Expected Calibration Error / ECE), dan efisiensi fisik perangkat keras (jumlah parameter, GFLOPs, latensi inferensi, dan konsumsi VRAM).
+\end{enumerate}
 
 \section{Manfaat Penelitian} \label{I.Manfaat}
-Manfaat tugas akhir yang dilakukan didefinisikan sebagai manfaat yang diperoleh ketika tugas akhir telah selesai dilakukan. Manfaat dapat berupa manfaat untuk: \textbf{mahasiswa, program studi teknik informatika, ITERA, masyarakat, dunia akademisi, dan dunia penelitian}. \par
+Manfaat yang diharapkan dari hasil penelitian ini meliputi: \par
 
+\begin{enumerate}[noitemsep]
+    \item \textbf{Manfaat Akademis dan Teoritis}: memberikan bukti empiris mengenai efisiensi linier arsitektur State Space Models (Mamba) pada citra medis dermatologi, serta menyajikan metodologi evaluasi lintas-dataset yang bersih dari kebocoran data (data leakage).
+    \item \textbf{Manfaat Praktis dan Klinis}: menyediakan rujukan arsitektur model diagnostik AI yang ringan, presisi, dan efisien sehingga siap diimplementasikan pada perangkat Edge AI di fasilitas kesehatan dengan keterbatasan infrastruktur.
+\end{enumerate}
 
 \section{Sistematika Penulisan} \label{I.Sistematika}
 Sistematika penulisan berisi pembahasan apa yang akan ditulis disetiap Bab. Sistematika pada umumnya berupa paragraf yang setiap paragraf mencerminkan bahasan setiap Bab. \par

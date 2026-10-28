@@ -23,6 +23,7 @@
 \usepackage{array} % % Untuk tabel di math mode
 \usepackage{float} % Untuk tabular
 \usepackage{longtable} % Untuk tabel yang potong halaman
+\usepackage{pdflscape} % Untuk orientasi halaman landscape
 \usepackage{amsmath} % Untuk equation
 \usepackage{enumitem} % Untuk list enumerate yg lebih rapi
 \usepackage{nameref} % Untuk dapat menggunakan nameref, referensi dengan nama section/caption
@@ -65,6 +66,7 @@
 \usepackage[style=ddmmyyyy,datesep=-]{datetime2}
 
 % Format citation
+\usepackage{csquotes} % Diperlukan oleh biblatex saat babel aktif
 \usepackage[backend=bibtex,citestyle=ieee]{biblatex} % Untuk bisa jalan di Texstudio, harus backend=bibtex
 % Seriusan, JANGAN GANTI BACKENDNYA (RDB)
 
@@ -409,10 +411,10 @@
 
 % Command untuk merubah spacing equation
 \g@addto@macro\normalsize{%
-	\setlength\abovedisplayskip{-10pt}
-	\setlength\belowdisplayskip{-10pt}
-	\setlength\abovedisplayshortskip{-10pt}
-	\setlength\belowdisplayshortskip{-10pt}
+	\setlength\abovedisplayskip{6pt plus 2pt minus 2pt}
+	\setlength\belowdisplayskip{6pt plus 2pt minus 2pt}
+	\setlength\abovedisplayshortskip{3pt plus 1pt minus 1pt}
+	\setlength\belowdisplayshortskip{3pt plus 1pt minus 1pt}
 }
 
 \makeatother % Jangan dihapus

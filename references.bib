@@ -1,59 +1,314 @@
-%--------------------------------------------------------------------%
-% File ini berisi list Daftar Pustaka. Entry pustaka berikut dapat disitasi 
-% kedalam badan dokumen menggunakan command \cite{label}
-%
-% NB: Daftar Pustaka hanya akan memunculkan entry yang disitasi 
-% dalam badan dokumen. Jika tidak, maka tidak akan muncul
-%--------------------------------------------------------------------%
-@book{knuth2001art,
-	title={The Art of Computer Programming: Fundamental Algorithms},
-	author={Knuth, D.E.},
-	number={v. 1},
-	isbn={9780201896831},
-	series={The Art of Computer Programming: Fundamental Algorithms},
-	year={2001},
-	publisher={Addison-Wesley}
+% =============================================================================
+% 1. MEDMAMBA, MAMBA & STATE SPACE MODELS (SSM)
+% =============================================================================
+
+@article{yue2024medmamba,
+  author        = {Yue, Yubiao and Li, Zhiming},
+  title         = {MedMamba: Vision Mamba for Medical Image Classification},
+  journal       = {arXiv preprint arXiv:2403.03849},
+  year          = {2024},
+  archiveprefix = {arXiv},
+  eprint        = {2403.03849},
+  primaryclass  = {cs.CV}
 }
 
-@INPROCEEDINGS{Vogels2006Am,
-	author={W. Vogels},
-	booktitle={2006 IEEE International Conference on Services Computing (SCC'06)},
-	title={Web Services at Amazon.com},
-	year={2006},
-	pages={xxii-xxii},
-	keywords={Distributed computing;Technological innovation;Web services},
-	doi={10.1109/SCC.2006.116},
-	month={Sept}
+@article{aalishah2025medmambalite,
+  author        = {Aalishah, Romina and Navardi, Mozhgan and Mohsenin, Tinoosh},
+  title         = {MedMambaLite: Hardware-Aware Mamba for Medical Image Classification},
+  journal       = {arXiv preprint arXiv:2508.05049},
+  year          = {2025},
+  archiveprefix = {arXiv},
+  eprint        = {2508.05049},
+  primaryclass  = {cs.CV}
 }
 
-@article{Ivanny2014Banding,
-    author = {Ivanny Kasenda and Sylviah Marunduh and Herlina Wungouw},
-    title = {PERBANDINGAN DENYUT NADI ANTARA PENDUDUK YANG TINGGAL DI DATARAN TINGGI DAN DATARAN RENDAH},
-    journal = {Jurnal e-Biomedik (eBM)},
-    volume = {2},
-    number = {2},
-    year = {2014}
+@article{gu2024mamba,
+  author        = {Gu, Albert and Dao, Tri},
+  title         = {Mamba: Linear-Time Sequence Modeling with Selective State Spaces},
+  journal       = {arXiv preprint arXiv:2312.00752},
+  year          = {2024},
+  archiveprefix = {arXiv},
+  eprint        = {2312.00752},
+  primaryclass  = {cs.LG}
 }
 
-@article{Suryanto2019MAE, 
-    title={PENERAPAN METODE MEAN ABSOLUTE ERROR (MEA) DALAM ALGORITMA REGRESI LINEAR UNTUK PREDIKSI PRODUKSI PADI}, 
-    author={Suryanto, Andik Adi and Muqtadir, Asfan}, 
-    year={2019},
-    journal={SAINTEKBU}, 
-    volume={11}, 
-    number={1}, 
-    pages={78–83}, 
-    url={https://ejournal.unwaha.ac.id/index.php/saintek/article/view/298},
-    DOI={10.32764/saintekbu.v11i1.298} 
+@inproceedings{liu2024vmamba,
+  author    = {Liu, Yue and Tian, Yunjie and Zhao, Yuzhong and Yu, Hongtian and Xie, Lingxi and Wang, Yaowei and Ye, Qixiang and Jiao, Jianbin and Liu, Yunfan},
+  title     = {VMamba: Visual State Space Model},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {37},
+  year      = {2024}
 }
 
-@article{cort2005maermse,
-        title={ Advantages of the mean absolute error (MAE) over the root mean square error (RMSE) in assessing average model performance },
-        author={ Cort J. Willmott and Kenji Matsuura },
-        journal={ Climate Research },
-        year={ 2005 },  
-        volume={ 30 },
-        pages={ 79-82 },
-        number={ 1 },
-        doi={ 10.3354/CR030079 },  
+@inproceedings{khosla2020supervised,
+  author    = {Khosla, Prannay and Teterwak, Piotr and Wang, Chen and Sarna, Aaron and Tian, Yonglong and Isola, Phillip and Maschinot, Aaron and Liu, Ce and Krishnan, Dilip},
+  title     = {Supervised Contrastive Learning},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {33},
+  pages     = {18661--18673},
+  year      = {2020}
+}
+
+% =============================================================================
+% 2. INTEGRITAS DATASET DERMAMNIST-C & FITZPATRICK17K-C
+% =============================================================================
+
+@article{abhishek2025investigating,
+  author    = {Abhishek, Kumar and Jain, Aditi and Hamarneh, Ghassan},
+  title     = {Investigating the quality of DermaMNIST and Fitzpatrick17k dermatological image datasets},
+  journal   = {Scientific Data},
+  volume    = {12},
+  number    = {1},
+  pages     = {196},
+  year      = {2025},
+  publisher = {Nature Publishing Group},
+  doi       = {10.1038/s41597-025-04382-5}
+}
+
+@article{tschandl2018ham10000,
+  author    = {Tschandl, Philipp and Rosendahl, Cliff and Kittler, Harald},
+  title     = {The HAM10000 dataset, a large collection of multi-source dermatoscopic images of common pigmented skin lesions},
+  journal   = {Scientific Data},
+  volume    = {5},
+  number    = {1},
+  pages     = {180161},
+  year      = {2018},
+  publisher = {Nature Publishing Group},
+  doi       = {10.1038/sdata.2018.161}
+}
+
+@article{yang2023medmnist,
+  author    = {Yang, Jiancheng and Shi, Rui and Wei, Donglai and Liu, Zequan and Zhao, Lin and Ke, Bilian and Pfister, Hanspeter and Ni, Bingbing},
+  title     = {MedMNIST v2--A large-scale lightweight benchmark for 2D and 3D biomedical image classification},
+  journal   = {Scientific Data},
+  volume    = {10},
+  number    = {1},
+  pages     = {41},
+  year      = {2023},
+  publisher = {Nature Publishing Group},
+  doi       = {10.1038/s41597-022-01721-8}
+}
+
+@inproceedings{groh2021evaluating,
+  author    = {Groh, Matthew and Harris, Caleb and Soenksen, Luis and Lau, Felix and Han, Rosalind and Kim, Aegis and Ko, Robert and Badri, Amar and Nogales, Tomas and Alonso, Tomas},
+  title     = {Evaluating Deep Neural Networks Trained on Clinical Images in Dermatology with the Fitzpatrick 17k Dataset},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR) Workshops},
+  pages     = {1820--1828},
+  year      = {2021},
+  doi       = {10.1109/CVPRW53098.2021.00201}
+}
+
+@article{disalvo2024medmnistc,
+  author        = {Di Salvo, Francesco and Doerrich, Sebastian and Ledig, Christian},
+  title         = {MedMNIST-C: Comprehensive benchmark and improved classifier robustness by simulating realistic image corruptions},
+  journal       = {arXiv preprint arXiv:2406.17536},
+  year          = {2024},
+  archiveprefix = {arXiv},
+  eprint        = {2406.17536},
+  primaryclass  = {eess.IV}
+}
+
+% =============================================================================
+% 3. LIGHTWEIGHT DEEP LEARNING & CLINICAL DEPLOYMENT (EDGE AI)
+% =============================================================================
+
+@article{nguyen2026efficient,
+  author        = {Nguyen, Cuong Manh and Hy, Truong-Son},
+  title         = {Efficient Deep Learning for Medical Imaging: Bridging the Gap Between High-Performance AI and Clinical Deployment},
+  journal       = {arXiv preprint arXiv:2602.00910},
+  year          = {2026},
+  archiveprefix = {arXiv},
+  eprint        = {2602.00910},
+  primaryclass  = {cs.CV}
+}
+
+@article{amangeldi2025cnn,
+  author        = {Amangeldi, Aidar and Taigonyrov, Angsar and Jawad, Muhammad Huzaid and Mbonu, Chinedu Emmanuel},
+  title         = {CNN and ViT Efficiency Study on Tiny ImageNet and DermaMNIST Datasets},
+  journal       = {arXiv preprint arXiv:2505.08259},
+  year          = {2025},
+  archiveprefix = {arXiv},
+  eprint        = {2505.08259},
+  primaryclass  = {cs.CV}
+}
+
+@article{lavaei2025resource,
+  author        = {Lavaei, Mahsa and Beigzad, Salar and Abadi, Zahra and Maleki, Alireza},
+  title         = {Resource-efficient medical image classification for edge devices},
+  journal       = {arXiv preprint arXiv:2512.17515},
+  year          = {2025},
+  archiveprefix = {arXiv},
+  eprint        = {2512.17515},
+  primaryclass  = {cs.CV}
+}
+
+% =============================================================================
+% 4. PENELITIAN LOKAL & BASELINE DERMAMNIST
+% =============================================================================
+
+@mastersthesis{hariz2026analisis,
+  author  = {Hariz, Arkan},
+  title   = {Analisis Performa Arsitektur ResNet-18 dan ResNet-50 dengan Penerapan Augmentasi Data Kelas Minoritas pada Dataset DermaMNIST},
+  type    = {Bachelor's Thesis},
+  school  = {Institut Teknologi Sumatera},
+  address = {Lampung, Indonesia},
+  year    = {2026}
+}
+
+% =============================================================================
+% 5. IMBALANCED DATA, AUGMENTATION & CLASS-WEIGHTED LOSS
+% =============================================================================
+
+@article{ahammed2026adaptive,
+  author    = {Ahammed, Sakib and Cui, Xia and Lu, Wenqi and Yap, Moi Hoon},
+  title     = {Adaptive distribution-aware transformer for multi-scale visual representation learning on imbalanced and low-resolution data},
+  journal   = {Medical Image Analysis},
+  volume    = {113},
+  pages     = {104162},
+  year      = {2026},
+  publisher = {Elsevier},
+  doi       = {10.1016/j.media.2026.104162}
+}
+
+@article{qi2025mediaug,
+  author        = {Qi, Xuyin and Zhang, Zeyu and Gang, Canxuan and Zhang, Hao and Zhang, Lei and Zhang, Zhiwei and Zhao, Yang},
+  title         = {MediAug: Exploring Visual Augmentation in Medical Imaging},
+  journal       = {arXiv preprint arXiv:2504.18983},
+  year          = {2025},
+  archiveprefix = {arXiv},
+  eprint        = {2504.18983},
+  primaryclass  = {cs.CV}
+}
+
+@article{salmi2024imbalanced,
+  author    = {Salmi, Mabrouka and Atif, Dalia and Oliva, Diego and Abraham, Ajith and Ventura, Sebastian and others},
+  title     = {Handling imbalanced medical datasets: review of a decade of research},
+  journal   = {Artificial Intelligence Review},
+  volume    = {57},
+  number    = {10},
+  pages     = {273},
+  year      = {2024},
+  publisher = {Springer},
+  doi       = {10.1007/s10462-024-10884-2}
+}
+
+@article{shorten2019survey,
+  author    = {Shorten, Connor and Khoshgoftaar, Taghi M.},
+  title     = {A survey on image data augmentation for deep learning},
+  journal   = {Journal of Big Data},
+  volume    = {6},
+  number    = {1},
+  pages     = {60},
+  year      = {2019},
+  publisher = {Springer},
+  doi       = {10.1186/s40537-019-0197-0}
+}
+
+@inproceedings{cui2019classbalanced,
+  author    = {Cui, Yin and Jia, Menglin and Lin, Tsung-Yi and Song, Yang and Belongie, Serge},
+  title     = {Class-Balanced Loss Based on Effective Number of Samples},
+  booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {9268--9277},
+  year      = {2019}
+}
+
+% =============================================================================
+% 6. ARSITEKTUR PEMBANDING: CNN vs VISION TRANSFORMER (ViT)
+% =============================================================================
+
+@article{esteva2017dermatologist,
+  author    = {Esteva, Andre and Kuprel, Brett and Novoa, Roberto A and Ko, Justin and Swetter, Susan M and Blau, Helen M and Thrun, Sebastian},
+  title     = {Dermatologist-level classification of skin cancer with deep neural networks},
+  journal   = {Nature},
+  volume    = {542},
+  number    = {7639},
+  pages     = {115--118},
+  year      = {2017},
+  publisher = {Nature Publishing Group}
+}
+
+@inproceedings{he2016deep,
+  author    = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  title     = {Deep residual learning for image recognition},
+  booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+  pages     = {770--778},
+  year      = {2016}
+}
+
+@inproceedings{dosovitskiy2021image,
+  author    = {Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and Uszkoreit, Jakob and Houlsby, Neil},
+  title     = {An image is worth 16x16 words: Transformers for image recognition at scale},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2021}
+}
+
+@article{mehta2022mobilevit,
+  author        = {Mehta, Sachin and Rastegari, Mohammad},
+  title         = {MobileViT: Light-weight, General-Purpose, and Mobile-Friendly Vision Transformer},
+  journal       = {arXiv preprint arXiv:2110.02178},
+  year          = {2022},
+  archiveprefix = {arXiv},
+  eprint        = {2110.02178},
+  primaryclass  = {cs.CV}
+}
+
+@inproceedings{liu2021swin,
+  author    = {Liu, Ze and Lin, Yutong and Cao, Yue and Hu, Han and Wei, Yixuan and Zhang, Zheng and Lin, Stephen and Guo, Baining},
+  title     = {Swin transformer: Hierarchical vision transformer using shifted windows},
+  booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+  pages     = {10012--10022},
+  year      = {2021}
+}
+
+@article{litjens2017survey,
+  author  = {Litjens, Geert and Kooi, Thijs and Ehteshami Bejnordi, Babak and Setio, Arnaud Arindra Adiyoso and Ciompi, Francesco and Ghafoorian, Mohsen and van der Laak, Jeroen A. W. M. and van Ginneken, Bram and S{\'a}nchez, Clara I.},
+  title   = {A survey on deep learning in medical image analysis},
+  journal = {Medical Image Analysis},
+  volume  = {42},
+  pages   = {60--88},
+  year    = {2017},
+  doi     = {10.1016/j.media.2017.07.005}
+}
+
+@article{shamshad2022transformers,
+  author        = {Shamshad, Fahad and Khan, Salman and Zamir, Syed Waqas and Khan, Muhammad Haris and Hayat, Munawar and Khan, Fahad Shahbaz and Fu, Huazhu},
+  title         = {Transformers in Medical Imaging: A Survey},
+  journal       = {arXiv preprint arXiv:2201.09873},
+  year          = {2022},
+  archiveprefix = {arXiv},
+  eprint        = {2201.09873},
+  primaryclass  = {eess.IV}
+}
+
+% =============================================================================
+% 7. METRIK EVALUASI, KALIBRASI (ECE) & MULTI-CLASS METRICS
+% =============================================================================
+
+@inproceedings{guo2017calibration,
+  author    = {Guo, Chuan and Pleiss, Geoff and Sun, Yu and Weinberger, Kilian Q},
+  title     = {On calibration of modern neural networks},
+  booktitle = {Proceedings of the 34th International Conference on Machine Learning (ICML)},
+  pages     = {1321--1330},
+  year      = {2017}
+}
+
+@article{chicco2023mcc,
+  author    = {Chicco, Davide and Jurman, Giuseppe},
+  title     = {The Matthews correlation coefficient (MCC) should replace the ROC AUC as the standard metric for assessing binary classification},
+  journal   = {BioData Mining},
+  volume    = {16},
+  number    = {1},
+  pages     = {4},
+  year      = {2023},
+  publisher = {BioMed Central}
+}
+
+@article{grandini2020metrics,
+  author        = {Grandini, Margherita and Bagli, Enrico and Visani, Giorgio},
+  title         = {Metrics for Multi-Class Classification: an Overview},
+  journal       = {arXiv preprint arXiv:2008.05756},
+  year          = {2020},
+  archiveprefix = {arXiv},
+  eprint        = {2008.05756},
+  primaryclass  = {stat.ML}
 }

@@ -2,109 +2,157 @@
 \chapter{TINJAUAN PUSTAKA} \label{Bab II}
 
 \section{Tinjauan Pustaka} \label{II.Tinjauan}
-Berisi penelitian terdahulu yang menjadi konsep / pendukung penelitian yang dilakukan. Lakukan pembahasan secara sistematis dengan menjelaskan masalah apa yang diangkat di penelitian terdahulu, metode yang digunakan, kontribusi yang diberikan, serta analisis penulis terkait dengan keunggulan atau keterbatasannya. Tuangkan perbandingan penelitian terdahulu dengan penelitian yang akan dikerjakan, minimal 5 jurnal pembanding (4-5 tahun terakhir). Kemudian penulis sebaiknya melakukan rangkuman terutama terkait dengan peluang pengembangan atau tugas akhir yang akan dilakukan \par
+Pengembangan kecerdasan buatan di bidang klasifikasi citra medis dermatologi mengalami transformasi pesat dalam kurun waktu lima tahun terakhir (2021--2026). Penelitian terdahulu berfokus pada upaya mengatasi dua tantangan utama: ketidakseimbangan kelas (\textit{imbalanced class}) yang ekstrem \cite{salmi2024imbalanced} dan efisiensi komputasi model saat disebarkan pada perangkat berdaya komputasi terbatas (\textit{edge devices}). Penelitian ini diposisikan untuk menutupi celah penelitian (\textit{research gap}) dengan mengevaluasi skalabilitas arsitektur \textit{State Space Models} (MedMamba-T, S, dan B), membandingkan skenario pelatihan \textit{Supervised} dan \textit{Contrastive Learning}, serta menguji daya tahan generalisasi model secara lintas-dataset (\textit{cross-dataset}) pada data medis terkoreksi yang bebas dari kebocoran data (\textit{data leakage}). \par
 
-Perujukan literatur dapat dilakukan dengan menambahkan entri baru dalam file \verb|references.bib|. Cara merujuk sitasi menggunakan \verb|\cite{nama label sitasi}|. Hasil sitasi seperti ini: \cite{knuth2001art}, \cite{Vogels2006Am}, atau \cite{Suryanto2019MAE}\cite{Ivanny2014Banding}. Daftar Pustaka hanya akan memunculkan sitasi yang direferensikan menggunakan command \verb|\cite{}|. \par
+Berikut adalah pembahasan sistematis mengenai penelitian-penelitian terdahulu yang menjadi pijakan utama penelitian ini: \par
 
-Tuliskan \textbf{judul jurnal, penulis jurnal, tahun jurnal terbit, penjelasan isi jurnal, metode penelitian, hasil penelitian \& pengujian}. \par
 \begin{enumerate}[noitemsep]
-	\item Sistem Informasi Pendaftaran Haji dan Umroh Di PT Multazam Sriwijaya Barakah Palembang Menggunakan Metode Rapid Application Development. \blindtext
-	\item Sistem Informasi Umroh Di PT XYZ Lampung Menggunakan Metode Rapid Application Development. \blindtext
+	\item Investigating the Quality of DermaMNIST and Fitzpatrick17k Dermatological Image Datasets. Penulis Tahun: Kumar Abhishek, Aditi Jain, dan Ghassan Hamarneh (2025). Penjelasan Isi: Penelitian ini mengevaluasi integritas dan kualitas dua dataset citra dermatologi terpopuler, yaitu DermaMNIST dan Fitzpatrick17k, yang banyak digunakan sebagai benchmark algoritma AI medis. Metode Penelitian: Menggunakan pustaka \textit{fastdup}, analisis \textit{embeddings} visual, serta verifikasi manual untuk mengidentifikasi duplikasi, kesalahan label (\textit{mislabeling}), dan kebocoran data antar partisi. Hasil Penelitian Pengujian: Menemukan ditemukannya kebocoran data (\textit{data leakage}) sebesar 13,47\% (1.006 dari 7.470 lesi unik) pada DermaMNIST murni akibat pemisahan berbasis citra (\textit{image-level split}), bukan lesi/pasien (\textit{patient-level split}). Penelitian ini menerbitkan versi perbaikan berupa \textit{DermaMNIST-C} dan \textit{Fitzpatrick17k-C}. Analisis Penulis: Penelitian ini memberikan kontribusi kritis terhadap validitas ilmiah AI medis. Keterbatasannya adalah belum mengevaluasi performa arsitektur modern ber-kompleksitas linear seperti Mamba pada dataset terkoreksi tersebut. \par
+
+	\item MedMamba: Vision Mamba for Medical Image Classification. Yubiao Yue dan Zhiming Li (2024). Mengembangkan arsitektur hibrida baru berbasis \textit{State Space Models} (SSM) bernama MedMamba untuk menangani klasifikasi citra medis multidomain. Mengintegrasikan \textit{Convolutional layers} untuk fitur lokal spasial dengan \textit{Visual State Space Module} (VSSM) yang menggunakan mekanisme \textit{selective scan} 4-arah (\textit{Cross-Scan Module}) ber-kompleksitas linear $\mathcal{O}(N)$. MedMamba mencapai akurasi dan \textit{Macro-F1} yang lebih unggul dibandingkan CNN (ResNet) dan Vision Transformer (Swin-ViT) \cite{liu2021swin} pada dataset MedMNIST dengan konsumsi memori VRAM yang jauh lebih hemat. Menjadi keunggulan utama dalam efisiensi komputasi. Keterbatasannya, pengujian masih dilakukan pada dataset standar murni yang berpotensi mengandung kebocoran data serta belum menguji varian skalabilitas (T/S/B) secara lintas-dataset. \par
+
+	\item MedMambaLite: Hardware-aware Mamba for Medical Image Classification. Ruhollah Aalishah, Mahdi Navardi, dan Tinoosh Mohsenin (2025). Mengoptimalkan arsitektur Mamba agar dapat dieksekusi secara efisien pada akselerator perangkat keras \textit{Edge AI} klinis. Menerapkan teknik \textit{hardware-aware architectural search}, pemangkasan parameter (\textit{pruning}), dan kuantisasi terarah. Berhasil memangkas konsumsi energi hingga 63\% pada platform NVIDIA Jetson Orin dengan degradasi akurasi kurang dari 1\%. Keunggulannya terbukti secara praktis untuk \textit{deployment} medis. Keterbatasannya belum menguji ketahanan model saat dihadapkan pada skenario \textit{Contrastive Learning} dan \textit{Cross-dataset generalization}. \par
+
+	\item Efficient Deep Learning for Medical Imaging: Bridging the Gap Between High-Performance AI and Clinical Deployment. Cuong Manh Nguyen dan Truong-Son Hy (2026). Membahas kesenjangan antara akurasi model AI di laboratorium dengan persyaratan efisiensi komputasi pada implementasi klinis nyata (\textit{Deployment-First AI}). Studi komparatif literatur dan eksperimen \textit{benchmark} terhadap berbagai arsitektur ringan (CNN, ViT, SSM) berdasarkan metrik akurasi, latensi inferensi, dan jejak memori. Mengidentifikasi model berkompleksitas linear sebagai salah satu kategori arsitektur efisien yang sedang berkembang untuk menyeimbangkan pemahaman konteks global dan efisiensi memori. Memberikan pijakan teoritis yang kuat, namun memerlukan pembuktian eksperimental secara spesifik pada kasus dermatologi yang sangat tidak seimbang. \par
+
+	\item Adaptive Distribution-aware Transformer for Multi-scale Visual Representation Learning on Imbalanced and Low-resolution Data. Sakib Ahammed, Xia Cui, Wenqi Lu, dan Moi Hoon Yap (2026). Menangani masalah ketidakseimbangan kelas ekstrem dan citra beresolusi rendah pada dataset dermatologi. Menggabungkan arsitektur \textit{Adaptive Transformer} dengan fungsi kerugian \textit{Distribution-aware Adaptive (DA) Loss}. Meningkatkan skor \textit{Macro-F1} dan \textit{Recall} secara signifikan pada kelas-kelas minoritas langka pada dataset ISIC dan HAM10000. Sangat efektif menangani \textit{imbalanced data}, namun mekanisme atensi transformer masih memerlukan memori yang lebih besar dibandingkan Mamba. \par
+
 \end{enumerate}
 
-Tabel ringkasan tinjauan pustaka ditulis setelah penjelasan masing-masing jurnal. \par
-\begin{longtable}{| b{0.05\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.15\textwidth}|p{0.25\textwidth}|} % Longtable berguna agar tabel dapat terpotong di halaman baru
+\begin{landscape}
+\begin{longtable}{|>{\centering\arraybackslash}b{0.04\linewidth}|>{\raggedright\arraybackslash}p{0.22\linewidth}|>{\raggedright\arraybackslash}p{0.19\linewidth}|>{\raggedright\arraybackslash}p{0.19\linewidth}|>{\raggedright\arraybackslash}p{0.21\linewidth}|}
 	\caption{Literasi Penelitian Terdahulu}
 	\label{table:2.literasi}\\
 	\hline
-	\textbf{No.} & \textbf{Judul} & \textbf{Masalah} & \textbf{Metode} & \textbf{Hasil} \\
+	\textbf{No.} & \textbf{Judul \& Penulis} & \textbf{Masalah} & \textbf{Metode} & \textbf{Hasil} \\
 	\hline
-	\endfirsthead % Header tabel untuk halaman pertama
+	\endfirsthead
 	\hline
-	\textbf{No.} & \textbf{Judul} & \textbf{Masalah} & \textbf{Metode} & \textbf{Hasil} \\
+	\textbf{No.} & \textbf{Judul \& Penulis} & \textbf{Masalah} & \textbf{Metode} & \textbf{Hasil} \\
 	\hline
-	\endhead % Header tabel untuk halaman selanjutnya (repeat header row)
-	1. & Sistem Informasi Pendaftaran Haji dan Umroh Di PT Multazam Sriwijaya Barakah Palembang Menggunakan Metode Rapid Application Development & Belum adanya sistem untuk pendaftaran haji \& umrah & Rapid Application Development & Sistem Informasi Pendaftaran Haji dan Umroh di PT Multazam Sriwijaya Barakah Palembang\\ 
+	\endhead
+
+	1. & Investigating the Quality of DermaMNIST and Fitzpatrick17k \cite{abhishek2025investigating} & Adanya kebocoran data (\textit{data leakage}) dan duplikasi pada dataset benchmark medis & Analisis \textit{fastdup}, \textit{embeddings}, dan pemisahan terisolasi pasien & Menemukan 13,47\% kebocoran data DermaMNIST dan merilis \textit{DermaMNIST-C} serta \textit{Fitzpatrick17k-C}. \\ 
 	\hline
-	2. & Sistem Informasi Umroh Di PT XYZ Lampung Menggunakan Metode Rapid Application Development & Belum adanya sistem untuk pendaftaran haji \& umrah & Rapid Application Development & Sistem Informasi Pendaftaran Umroh di PT XYZ Lampung\\ 
+	2. & MedMamba: Vision Mamba for Medical Image Classification \cite{yue2024medmamba} & Kompleksitas kuadratik $\mathcal{O}(N^2)$ pada ViT membebani memori VRAM & Hibrida CNN + \textit{Visual State Space Module} (VSSM) $\mathcal{O}(N)$ & Akurasi dan efisiensi memori melampaui ResNet dan Swin-ViT pada MedMNIST. \\ 
 	\hline
-	3. & Sistem Informasi Umroh Di PT XYZ Lampung Menggunakan Metode Rapid Application Development & Belum adanya sistem untuk pendaftaran haji \& umrah & Rapid Application Development & Sistem Informasi Pendaftaran Umroh di PT XYZ Lampung\\ 
+	3. & MedMambaLite: Hardware-aware Mamba \cite{aalishah2025medmambalite} & Tingginya konsumsi daya model AI pada perangkat \textit{Edge AI} medis & \textit{Hardware-aware pruning} dan kuantisasi Mamba & Menghemat energi hingga 63\% pada platform NVIDIA Jetson Orin. \\ 
+	\hline
+	4. & Efficient Deep Learning for Medical Imaging \cite{nguyen2026efficient} & Kesenjangan antara performa AI laboratorium dengan \textit{clinical deployment} & Tinjauan komparatif arsitektur \textit{lightweight} (CNN, ViT, SSM) & Model berkompleksitas linear diidentifikasi sebagai kategori efisien yang berkembang untuk paradigma \textit{Deployment-First AI}. \\ 
+	\hline
+	5. & Adaptive Distribution-aware Transformer \cite{ahammed2026adaptive} & Ketidakseimbangan kelas ekstrem dan citra medis beresolusi rendah & \textit{Adaptive Transformer} + \textit{Distribution-aware Adaptive Loss} & Meningkatkan \textit{Macro-F1} dan \textit{Recall} kelas minoritas secara signifikan. \\ 
 	\hline
 \end{longtable}
+\end{landscape}
 
 \section{Dasar Teori} \label{II.Teori}
-Berisi teori/konsep yang berkaitan/digunakan dalam tugas akhir yang dikerjakan. Gunakanlah data melalui buku/jurnal referensi, publikasi tugas akhir, penelitian, buku, dan informasi web yang dapat dipertanggungjawabkan, hindari penggunaan dasar teori melalui tautan Wikipedia, surat kabar, atau portal berita, yang dapat memiliki isi yang tidak bersifat fakta. \par
+Sub-bab ini menguraikan landasan teori dan konsep ilmiah yang digunakan dalam pelaksanaan tugas akhir ini. Mengambil inspirasi dari struktur landasan teori pada penelitian terdahulu \cite{hariz2026analisis}, sub-bab ini dikembangkan lebih lanjut dengan mengintegrasikan dua aspek pembeda utama, yaitu penggunaan dataset klinis \textit{Fitzpatrick17k-C} di samping \textit{DermaMNIST-C}, serta penerapan keluarga arsitektur \textit{State Space Models} (\textit{MedMamba-T}, \textit{MedMamba-S}, dan \textit{MedMamba-B}) sebagai pengganti arsitektur CNN konvensional. \par
 
-\subsection{Teori 1} \label{II.Teori1}
-Berikut adalah contoh penyisipan tabel menggunakan \verb|\begin{longtable}{}|: \par
-	
-	\begin{longtable}{|c|c|c|c|}
-		\caption{Contoh Tabel}
-		\label{table:2.contoh}\\
-		\hline
-		Col1 & Col2 & Col2 & Col3 \\
-		\hline
-		\endhead
-		1 & 6 & 87837 & 787 \\ 
-		\hline
-		2 & 7 & 78 & 5415 \\
-		\hline
-		3 & 545 & 778 & 7507 \\
-		\hline
-		4 & 545 & 18744 & 7560 \\
-		\hline
-		5 & 88 & 788 & 6344 \\
-		\hline
-	\end{longtable}
+\subsection{DermaMNIST-C} \label{II.Teori.DermaMNIST}
+DermaMNIST merupakan salah satu dataset publik terpopuler dalam konsorsium \textit{MedMNIST v2} \cite{yang2023medmnist} yang diturunkan langsung dari dataset dermatoskopi \textit{HAM10000} (\textit{Human Against Machine with 10000 training images}) \cite{tschandl2018ham10000}. Dataset ini terdiri dari 10.015 citra lesi kulit berpigmen yang dikelompokkan ke dalam 7 kategori diagnosis medis \cite{hariz2026analisis}. Kumpulan penyakit ini merepresentasikan lebih dari 95\% kasus klinis lesi kulit yang dijumpai dalam konsulitasi dermatologi harian \cite{abhishek2025investigating}. \par
 
-\subsubsection{Subsubbab} \label{II.Teori1.1}
-Berikut adalah contoh subsubbab. Ini adalah level subbab maksimal dalam laporan Tugas Akhir, dan tidak boleh lebih dalam. \par
+Meskipun digunakan secara luas pada ratusan publikasi ilmiah, investigasi mutakhir oleh Abhishek et al. (2025) mengungkap bahwa DermaMNIST murni mengalami cacat integritas data berupa kebocoran data (\textit{data leakage}) sebesar 13,47\% (1.006 dari 7.470 lesi unik) \cite{abhishek2025investigating}. Kebocoran ini terjadi akibat pemisahan folder \textit{train}, \textit{val}, dan \textit{test} yang dilakukan di tingkat gambar (\textit{image-level split}), sehingga gambar dari lesi pasien yang sama muncul simultan di folder pelatihan dan pengujian \cite{abhishek2025investigating}. Selain itu, proses pembuatan citra beresolusi $224 \times 224$ piksel pada DermaMNIST asli dilakukan dengan menginterpolasi ulang citra $28 \times 28$ menggunakan \textit{nearest neighbor}, yang menyebabkan pikselasi parah dan hilangnya detail struktur dermatoskopi \cite{abhishek2025investigating}. \par
 
-Gambar \ref{fig:2.contoh} adalah contoh Gambar yang diambil dari internet yang harus dicantumkan sumbernya dan memiliki lisensi Creative Common. Jika gambar adalah milik peneliti lain atau tidak dibuat atau diambil sendiri maka peneliti wajib meminta izin kepada peneliti lain tersebut untuk mencantumkan gambar. Gunakan \verb|\begin{figure}| untuk memasukkan gambar. Gunakan \verb|\caption{[nama caption]}| untuk memberikan caption gambar. Nomor caption akan diurutkan secara otomatis. Jangan lupa untuk melabeli setiap gambar dengan \verb|\label{[nama label]}|, agar bisa direferensi menggunakan \verb|\ref{[nama label]}| \par
-\begin{figure}[H] % Kalau menggunakan H, posisi gambar akan tepat dibawah teks
-	\centering
-	\includegraphics[width=0.6\textwidth]{figure/keyboard.jpg}
-	\caption{Contoh gambar dan caption}
-	\label{fig:2.contoh}
-	{\footnotesize Sumber: Contoh} % Untuk memberikan sumber
-\end{figure}
+Versi terkoreksi, \textbf{DermaMNIST-C}, menyelesaikan permasalahan tersebut dengan melakukan pemisahan terisolasi di tingkat lesi/pasien (\textit{lesion-level disjoint split}) serta melakukan pemotongan dan pencuplik-ulangan (\textit{resizing}) secara langsung dari resolusi asli $600 \times 450$ piksel menggunakan interpolasi \textit{bicubic} \cite{abhishek2025investigating}. Rincian dari ketujuh kategori lesi kulit pada DermaMNIST-C diuraikan sebagai berikut: \par
 
-\subsection{Teori 2} \label{II.teori2}
-Untuk membuat sebuah rumus persamaan, gunakan kode \verb|\begin{equationcaptioned}| seperti dibawah: \par
-	
-\begin{equationcaptioned}[eq:2.sederhana]{
-	x + 1 = 2
-}{
-	Rumus sederhana % Caption rumus
-}
-\end{equationcaptioned}
+\subsubsection{Actinic Keratoses and Intraepidhelial Carcinoma (\texttt{akiec})}
+\textit{Actinic Keratoses} (AK) merupakan lesi pra-kanker pada sel epidermal kulit yang dipicu oleh paparan radiasi sinar ultraviolet (UV) secara kronis \cite{hariz2026analisis}. Secara biologis, AK dianggap sebagai bentuk karsinoma in-situ awal dari \textit{Squamous Cell Carcinoma} (SCC). Ketika sel-sel neoplastik atypik tersebut menembus membran basalis epidermis dan menyerang lapisan dermis di bawahnya, lesi ini berkembang menjadi \textit{Intraepidhelial Carcinoma}. Pada dataset DermaMNIST-C, kelas \texttt{akiec} tergolong sebagai kelas minoritas dengan proporsi sebesar 3,27\% (327 sampel) \cite{abhishek2025investigating}.
 
-Teks caption rumus tidak akan muncul di teks, tetapi akan muncul di Daftar Rumus. \par
+\subsubsection{Basal Cell Carcinoma (\texttt{bcc})}
+\textit{Basal Cell Carcinoma} (BCC) merupakan jenis kanker kulit non-melanoma paling umum yang timbul dari sel-sel basal pada lapisan terdalam epidermis \cite{hariz2026analisis}. Kanker ini memiliki laju pertumbuhan yang relatif lambat dengan angka metastasis yang rendah, namun dapat menyebabkan kerusakan jaringan lokal yang destruktif jika tidak diintervensi. BCC paling sering muncul pada area tubuh yang terpapar sinar matahari secara konstan, seperti wajah dan leher. Kategori \texttt{bcc} mencakup 5,13\% (514 sampel) dari total populasi dataset \cite{abhishek2025investigating}. \par
 
-\begin{equationcaptioned}[eq:2.mae]{
-    MAE = \frac{1}{n} \sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|
-}{
-    Mean Absolute Error (MAE)
-}
-\end{equationcaptioned}
+\subsubsection{Benign Keratosis-Like Lesions (\texttt{bkl})}
+\textit{Benign Keratosis-Like Lesions} (BKL) merupakan kategori komposit yang menggabungkan tiga varian lesi kulit jinak (\textit{benign}), yaitu \textit{seborrheic keratoses}, \textit{solar lentigo}, dan \textit{lichen planus-like keratoses} \cite{tschandl2018ham10000, hariz2026analisis}. Penggabungan ketiga varian klinis ini dilakukan karena ketiganya memiliki gambaran struktural biologis serta morfologi dermatoskopik yang saling beririsan. Pola visual BKL yang sangat bervariasi menjadi tantangan tersendiri bagi ekstraksi fitur model \textit{deep learning}. Kategori ini mencakup 10,97\% (1.099 sampel) dari dataset \cite{abhishek2025investigating}. \par
 
-Berikut adalah contoh penulisan persamaan yang lebih kompleks, yaitu persamaan distribusi normal. \par
+\subsubsection{Dermatofibroma (\texttt{df})}
+\textit{Dermatofibroma} (DF) adalah nodul kulit jinak pada lapisan dermal yang terbentuk sebagai reaksi proliferasi fibrosit sekunder akibat trauma fisik ringan, seperti gigitan serangga atau luka gores \cite{hariz2026analisis}. Ciri dermatoskopik khas dari \textit{dermatofibroma} adalah ditemukannya struktur jaring retikular pigmen di area perifer yang mengelilingi daerah pusat berwarna putih (\textit{central white patch}). Kategori \texttt{df} merupakan \textbf{kelas paling minoritas} pada DermaMNIST-C dengan proporsi hanya sebesar 1,15\% (115 sampel) \cite{abhishek2025investigating}.
 
-\begin{equationcaptioned}[eq:2.mae]{
-		P(x) = \frac{1}{{\sigma \sqrt {2\pi } }}e^{{{ - \left( {x - \mu } \right)^2 } \mathord{\left/ {\vphantom {{ - \left( {x - \mu } \right)^2 } {2\sigma ^2 }}} \right. \kern-\nulldelimiterspace} {2\sigma ^2 }}}
-	}{
-		Distribusi Normal
-	}
-\end{equationcaptioned}
+\subsubsection{Melanoma (\texttt{mel})}
+\textit{Melanoma} merupakan neoplasma ganas paling agresif dan mematikan yang berasal dari transformasi maligna sel-sel melanosit \cite{hariz2026analisis}. Melanoma memiliki potensi metastasis yang sangat tinggi ke organ-organ vital melalui invasi sistem limfatik dan pembuluh darah. Secara dermatoskopik, melanoma ditandai dengan ketidaksimetrisan bentuk (asimetri), batas lesi yang tidak teratur, variasi warna yang heterogen (hitam, cokelat, biru, merah), serta ditemukannya globula dan jaringan pigmen atypik. Kategori \texttt{mel} mencakup 11,11\% (1.113 sampel) dari total data \cite{abhishek2025investigating}.
 
-Jika menuliskan banyak persamaan secara berurutan, gunakan  \verb|\begin{split}|: \par
+\subsubsection{Melanocytic Nevi (\texttt{nv})}
+\textit{Melanocytic Nevi} (tahi lalat) merupakan proliferasi jinak dari sel-sel melanosit \cite{hariz2026analisis}. Lesi ini bersifat non-maligna dan memiliki risiko transformasi ganas yang sangat minimal. Karakteristik visual \textit{nevi} bervariasi mulai dari makula datar berpigmen hingga papula yang menonjol. Pada dataset DermaMNIST-C, kelas \texttt{nv} merupakan \textbf{kelas mayoritas yang sangat dominan}, mencakup hingga \textbf{66,95\% (6.705 sampel)} dari keseluruhan dataset \cite{abhishek2025investigating}. Dominasi ekstrem ini menjadi pemicu utama timbulnya bias prediksi pada fungsi kerugian konvensional \cite{hariz2026analisis}.
 
-\begin{equationcaptioned}[eq:2.mae]{
-		\begin{split} 
-			2x - 5y &=  8 \\ 
-			3x + 9y &=  -12
-		\end{split}
-	}{
-		Sistem persamaan linier
-	}
-\end{equationcaptioned}
+\subsubsection{Vascular Lesions (\texttt{vasc})}
+\textit{Vascular Lesions} mencakup kelompok kelainan pembuluh darah kulit yang bersifat jinak, seperti \textit{cherry angioma}, \textit{angiokeratoma}, \textit{pyogenic granuloma}, dan lesi perdarahan (\textit{intralesional hemorrhage}) \cite{hariz2026analisis}. Ciri visual dermatoskopi utama dari kelas ini adalah ditemukannya gambaran gumpalan merah (\textit{red clods}) atau rongga pembuluh darah (\textit{lacunes}) berwarna ungu hingga biru-kehitaman. Kelas \texttt{vasc} tergolong sebagai kelas minoritas dengan proporsi 1,42\% (142 sampel) \cite{abhishek2025investigating}.
+
+\subsection{Fitzpatrick17k-C} \label{II.Teori.Fitzpatrick}
+Untuk menguji keandalan generalisasi model secara lintas-dataset (\textit{cross-dataset generalization}), penelitian ini mengikutsertakan dataset \textbf{Fitzpatrick17k-C} \cite{abhishek2025investigating, groh2021evaluating}. Fitzpatrick17k murni yang dirilis oleh Groh et al. (2021) merupakan salah satu dataset citra medis klinis (\textit{in-the-wild}) terbesar yang terdiri dari 16.577 citra yang mencakup 114 kategori penyakit kulit dan dilengkapi dengan anotasi skala tipe warna kulit \textit{Fitzpatrick Skin Tone} (FST I--VI) \cite{groh2021evaluating}. \par
+
+Namun demikian, investigasi oleh Abhishek et al. (2025) menemukan bahwa Fitzpatrick17k murni memiliki berbagai keterbatasan kualitas, meliputi ditemukannya duplikasi citra masif, ketidaksesuaian label diagnosis (\textit{mislabeled images}), serta ketiadaan partisi pengujian baku (\textit{held-out test set}) yang memicu variabilitas tinggi antar eksperimen \cite{abhishek2025investigating}. \par
+
+Versi perbaikan Fitzpatrick17k-C mengatasi masalah ini dengan membuang citra duplikat dan citra berlabel salah, sehingga menghasilkan dataset bersih sebanyak 11.394 citra klinis \cite{abhishek2025investigating}. Selain itu, Fitzpatrick17k-C menyediakan pembagian partisi baku *train-validation-test* berasio 70:10:20 yang terstratifikasi berdasarkan label diagnosis \cite{abhishek2025investigating}. Evaluasi pada Fitzpatrick17k-C sangat krusial untuk menguji sejauh mana arsitektur linear MedMamba (T/S/B) \cite{yue2024medmamba, aalishah2025medmambalite} mampu menggeneralisasi fitur medis pada citra klinis dengan variasi pencahayaan dan keberagaman warna kulit pasien \cite{nguyen2026efficient}.
+
+\subsection{\textit{Imbalanced Data}} \label{II.Teori.Imbalance}
+Masalah ketidakseimbangan data (\textit{imbalanced data}) terjadi ketika distribusi sampel antarkelas sangat tidak merata \cite{salmi2024imbalanced}. Pada DermaMNIST-C, kelas mayoritas \textit{Melanocytic Nevi} (\texttt{nv}) mendominasi hingga $\sim$67\% data latih, sedangkan kelas minoritas seperti \textit{Dermatofibroma} (\texttt{df}) dan \textit{Vascular Lesions} (\texttt{vasc}) masing-masing hanya mencakup $\sim$1,14\% dan $\sim$1,41\% data. \par
+
+Kondisi ini menyebabkan fungsi kerugian \textit{Cross-Entropy} standar terbias ke arah kelas mayoritas, sehingga menghasilkan akurasi keseluruhan yang tinggi secara semu tetapi memiliki sensitivitas (\textit{recall}) yang sangat rendah pada penyakit langka \cite{hariz2026analisis}. Untuk mengatasinya, penelitian ini menerapkan \textit{Class-Weighted Cross-Entropy Loss} ($\mathcal{L}_{CWCE}$) \cite{cui2019classbalanced}:
+\begin{equation}
+	\mathcal{L}_{CWCE} = -\sum_{c=1}^{C} w_c \cdot y_c \log(\hat{y}_c)
+\end{equation}
+di mana bobot penalti kelas $w_c$ dihitung berdasarkan frekuensi terbalik sampel:
+\begin{equation}
+	w_c = \frac{N_{total}}{C \cdot N_c}
+\end{equation}
+dengan $N_{total}$ adalah total sampel, $C$ adalah jumlah kelas, dan $N_c$ adalah jumlah sampel pada kelas $c$. \par
+
+\subsection{Arsitektur Model: Dari CNN/ViT ke State Space Models (MedMamba)} \label{II.Teori.MedMamba}
+Berbeda dari penelitian \cite{hariz2026analisis} yang berfokus pada arsitektur CNN konvensional (\textit{ResNet-18} dan \textit{ResNet-50}), penelitian ini mengeksplorasi arsitektur mutakhir berbasis \textit{State Space Models} (SSM) yaitu \textbf{MedMamba} \cite{yue2024medmamba}. \par
+
+\subsubsection{Prinsip Dasar State Space Models (SSM) dan Mamba}
+\textit{State Space Models} memodelkan sistem sekuensial kontinu yang memetakan masukan $x(t) \in \mathbb{R}$ ke keluaran $y(t) \in \mathbb{R}$ melalui variabel keadaan tersembunyi $h(t) \in \mathbb{R}^N$:
+\begin{equation}
+	h'(t) = \mathbf{A} h(t) + \mathbf{B} x(t)
+\end{equation}
+\begin{equation}
+	y(t) = \mathbf{C} h(t)
+\end{equation}
+Untuk diimplementasikan pada data diskrit, persamaan di atas didiskretisasi menggunakan aturan \textit{Zero-Order Hold} (ZOH) dengan parameter langkah $\mathbf{\Delta}$:
+\begin{equation}
+	\mathbf{\bar{A}} = \exp(\mathbf{\Delta} \mathbf{A}), \quad \mathbf{\bar{B}} = (\mathbf{\Delta} \mathbf{A})^{-1} (\mathbf{\bar{A}} - \mathbf{I}) \cdot \mathbf{\Delta} \mathbf{B}
+\end{equation}
+\begin{equation}
+	h_t = \mathbf{\bar{A}} h_{t-1} + \mathbf{\bar{B}} x_t, \quad y_t = \mathbf{C} h_t
+\end{equation}
+Arsitektur Mamba menggabungkan pemrosesan selektif terbobot data (\textit{Selective Scan Mechanism}) dengan kompleksitas komputasi linear $\mathcal{O}(N)$ \cite{gu2024mamba}, menggantikan kompleksitas kuadratik $\mathcal{O}(N^2)$ pada \textit{Vision Transformer} (ViT) dan variannya \cite{liu2021swin, mehta2022mobilevit, yue2024medmamba}. \par
+
+\subsubsection{Modul Visual State Space Module (VSSM) dan Skalabilitas MedMamba}
+MedMamba mengintegrasikan \textit{Convolutional layers} untuk fitur lokal dengan modul \textit{Visual State Space} (VSSM) yang menggunakan \textit{Cross-Scan Module} (CSM) untuk memindai citra 2D ke 4 arah spasial \cite{liu2024vmamba, yue2024medmamba}. \par
+
+Penelitian ini menguji tiga varian skala MedMamba untuk memetakan \textit{trade-off} antara kapasitas parameter dan efisiensi komputasi:
+\begin{itemize}[noitemsep]
+	\item \textbf{MedMamba-T (\textit{Tiny}):} Dikonfigurasi dengan kedalaman \texttt{depths = [1, 2]} dan dimensi \texttt{dims = [3, 4]} ($\sim$14,5M parameter).
+	\item \textbf{MedMamba-S (\textit{Small}):} Dikonfigurasi dengan kedalaman \texttt{depths = [1, 5]} dan dimensi \texttt{dims = [3, 4]} ($\sim$22,8M parameter) --- sebagai \textbf{fokus utama studi}.
+	\item \textbf{MedMamba-B (\textit{Base}):} Dikonfigurasi dengan kedalaman \texttt{depths = [1, 6]} dan dimensi \texttt{dims = [7]} ($\sim$47,1M parameter) --- sebagai \textbf{baseline \textit{upper-bound}}.
+\end{itemize} \par
+
+\subsection{Paradigma Pelatihan: Supervised vs. Contrastive Learning} \label{II.Teori.Pelatihan}
+Selain pengujian \textit{Supervised Learning} terawasi, penelitian ini mengimplementasikan paradigma \textit{Supervised Contrastive Learning} (SupCon) \cite{khosla2020supervised}. SupCon melatih \textit{backbone} MedMamba untuk memetakan proyeksi fitur $z_i$ ke dalam ruang laten tempat pasangan sampel dari kelas diagnosis yang sama didekatkan, sementara sampel dari kelas berbeda dipisahkan:
+\begin{equation}
+	\mathcal{L}_{SupCon} = \sum_{i \in I} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(z_i \cdot z_p / \tau)}{\sum_{a \in A(i)} \exp(z_i \cdot z_a / \tau)}
+\end{equation}
+di mana $P(i)$ adalah himpunan indeks sampel yang memiliki label kelas sama dengan $i$, dan $\tau > 0$ adalah parameter temperatur. \par
+
+\subsection{Metrik Evaluasi, Kalibrasi, dan Efisiensi Perangkat Keras} \label{II.Teori.Evaluasi}
+Mengembangkan metrik pada \cite{hariz2026analisis, grandini2020metrics}, evaluasi kinerja model dikelompokkan ke dalam tiga kategori utama: \par
+
+\subsubsection{Metrik Kinerja Klasifikasi Multikelas}
+Berdasarkan \textit{Confusion Matrix} multikelas ($TP_c, FP_c, TN_c, FN_c$), dihitung metrik berikut \cite{hariz2026analisis}:
+\begin{align}
+	\text{Accuracy} &= \frac{\sum_{c=1}^{C} TP_c}{N_{total}} \\
+	\text{Macro Precision} &= \frac{1}{C} \sum_{c=1}^{C} \frac{TP_c}{TP_c + FP_c} \\
+	\text{Macro Recall} &= \frac{1}{C} \sum_{c=1}^{C} \frac{TP_c}{TP_c + FN_c} \\
+	\text{Macro F1-Score} &= \frac{1}{C} \sum_{c=1}^{C} 2 \cdot \frac{\text{Precision}_c \cdot \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c} \\
+	\text{MCC} &= \frac{c \cdot s - \sum_{k}^{C} p_k t_k}{\sqrt{\left(s^2 - \sum_{k}^{C} p_k^2\right) \left(s^2 - \sum_{k}^{C} t_k^2\right)}}
+\end{align}
+di mana \textit{Matthews Correlation Coefficient} (MCC) memberikan pengujian yang adil pada kondisi \textit{imbalanced class} \cite{chicco2023mcc}. \par
+
+\subsubsection{Metrik Reliabilitas Kalibrasi Prediksi}
+Untuk menjamin keamanan klinis agar tingkat kepercayaan model (\textit{confidence score}) selaras dengan akurasi aktualnya, diukur metrik \textit{Expected Calibration Error} (ECE) \cite{guo2017calibration}:
+\begin{equation}
+	\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|
+\end{equation}
+di mana sampel dikelompokkan ke dalam $M$ bin interval kepercayaan $B_m$. \par
+
+\subsection{Metrik Efisiensi Komputasi Hardware}
+Efisiensi komputasi fisik diukur secara langsung pada GPU laptop NVIDIA RTX 2050 (4 GB VRAM) mencakup: konsumsi VRAM puncak (MB/GB), \textit{throughput} (citra/detik), latensi inferensi per sampel (ms), jumlah parameter terparameterisasi, serta GFLOPs. \par
