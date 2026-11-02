@@ -67,7 +67,16 @@
 
 % Format citation
 \usepackage{csquotes} % Diperlukan oleh biblatex saat babel aktif
-\usepackage[backend=bibtex,citestyle=ieee]{biblatex} % Untuk bisa jalan di Texstudio, harus backend=bibtex
+\DeclareQuoteAlias{english}{bahasa}
+\usepackage[backend=bibtex,citestyle=ieee]{biblatex}
+\makeatletter
+% Fix upstream biblatex bug with backend=bibtex where citeorder test causes infinite rerun loop
+\AtBeginDocument{%
+  \csundef{blx@sortingtemplate@citeorder@relevant@none}%
+  \csundef{blx@sortingtemplate@citeorder@relevant@ieee}%
+  \csundef{blx@sortingtemplate@citeorder@relevant@auto}%
+}
+\makeatother % Untuk bisa jalan di Texstudio, harus backend=bibtex
 % Seriusan, JANGAN GANTI BACKENDNYA (RDB)
 
 % Remove "In:" before journal titles

@@ -2,99 +2,244 @@
 \chapter{METODE PENELITIAN} \label{Bab III}
 
 \section{Alur Penelitian} \label{III.Alur}
-Penelitian ini berfokus pada evaluasi skalabilitas, generalisasi lintas-dataset, dan efisiensi komputasi dari keluarga arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) pada klasifikasi citra penyakit kulit yang tidak seimbang. Alur pelaksanaan penelitian secara terstruktur ditunjukkan pada diagram berikut (\textit{flowchart}) seperti yang terlihat pada Gambar \ref{fig:3.alur}. \par
+Penelitian ini dirancang secara sistematis untuk mengevaluasi skalabilitas arsitektur MedMamba (skala Tiny, Small, dan Base) di bawah dua paradigma pelatihan yang berbeda (Supervised Learning terbobot vs. Supervised Contrastive Learning) pada dataset dermatoskopi bebas kebocoran data (DermaMNIST-C). Tahapan pelaksanaan penelitian ditunjukkan pada diagram alir (\textit{flowchart}) pada Gambar \ref{fig:3.alur}. \par
 
 \begin{figure}[H] 
     \centering
-    \includegraphics[width=0.9\textwidth]{figure/Diagram Alur.jpeg}
+    \includegraphics[width=0.78\textwidth]{figure/flowchart_generator.pdf}
     \caption{Alur Penelitian}
     \label{fig:3.alur}
 \end{figure}
 
 \section{Penjabaran Langkah Penelitian} \label{III.Jabar Alur}
-Penjelasan dari setiap langkah pada alur penelitian akan dijelaskan secara merinci untuk memberikan detail yang jelas terhadap metode yang digunakan. Berikut penjelasan dari setiap langkah penelitian tersebut. \par
+Penjelasan rinci mengenai setiap tahapan penelitian pada diagram alir diuraikan sebagai berikut: \par
 
 \subsection{Identifikasi Masalah} \label{III.Identifikasi}
-Tahap awal yang dilakukan sebelum memulai penelitian adalah identifikasi masalah. Identifikasi dilakukan dengan cara menelaah secara mendalam karakteristik dataset dermatologi medis serta keterbatasan arsitektur model klasifikasi yang ada saat ini. Pada klasifikasi penyakit kulit menggunakan dataset DermaMNIST, ditemukan adanya ketidakseimbangan kelas yang sangat ekstrem di mana kelas mayoritas \textit{Melanocytic Nevi} (\texttt{nv}) mendominasi hingga $\sim$67\% dari keseluruhan sampel, sedangkan kelas minoritas seperti \textit{Dermatofibroma} (\texttt{df}) dan \textit{Vascular Lesions} (\texttt{vasc}) masing-masing hanya mencakup $\sim$1,14\% dan $\sim$1,41\% data. Kondisi ketimpangan ini memicu bias prediksi pada fungsi kerugian konvensional dan menurunkan sensitivitas model terhadap penyakit langka \cite{hariz2026analisis}. Selain itu, investigasi kualitas data mengungkapkan ditemukannya kebocoran data (\textit{data leakage}) sebesar 13,47\% pada DermaMNIST murni akibat pemisahan berbasis gambar (\textit{image-level split}), yang mengakibatkan inflasi performa secara semu \cite{abhishek2025investigating}. Di sisi lain, penggunaan arsitektur \textit{Vision Transformer} (ViT) memicu masalah baru berupa kompleksitas komputasi kuadratik $\mathcal{O}(N^2)$ yang sangat membebani memori VRAM \cite{dosovitskiy2021image}. Berdasarkan permasalahan tersebut, penelitian ini mengevaluasi arsitektur \textit{State Space Models} (MedMamba) ber-kompleksitas linear $\mathcal{O}(N)$ pada dataset terkoreksi (\textit{DermaMNIST-C} dan \textit{Fitzpatrick17k-C}) untuk mengatasi masalah ketidakseimbangan data, kebocoran data, dan keterbatasan efisiensi komputasi pada perangkat \textit{Edge AI}. \par
-
+Tahap awal penelitian dilakukan dengan menelaah tantangan komputasi dan metodologis pada klasifikasi citra lesi kulit. Ditemukan bahwa penelitian terdahulu pada DermaMNIST menghadapi ketimpangan kelas yang sangat ekstrem (Melanocytic Nevi $\sim$67\% vs Dermatofibroma $\sim$1,15\%) yang memicu bias prediksi pada model konvensional \cite{salmi2024imbalanced}. Selain itu, investigasi data oleh Abhishek et al. (2025) \cite{abhishek2025investigating} membuktikan bahwa DermaMNIST asli mengalami kebocoran data sebesar 13,47\% akibat pemisahan berbasis citra (\textit{image-level split}). Di sisi arsitektur, Vision Transformer menuntut komputasi kuadratik $\mathcal{O}(N^2)$ yang berat \cite{amangeldi2025cnn}. Berdasarkan permasalahan tersebut, penelitian ini memformulasikan studi komparatif arsitektur State Space Models (MedMamba) ber-kompleksitas linear $\mathcal{O}(N)$ pada dataset DermaMNIST-C yang bersih dari kebocoran data. \par
 
 \subsection{Studi Literatur} \label{III.Studi}
-Tahap studi literatur dilakukan dengan mengumpulkan, mempelajari, dan mengkaji berbagai sumber akademis terpercaya yang diterbitkan dalam kurun waktu lima tahun terakhir (2021--2026). Referensi yang dikumpulkan berfokus pada lima pilar utama, yaitu: konsep dasar pemrosesan sekuensial linear berbasis \textit{State Space Models} (SSM) dan modul \textit{Visual State Space} (VSSM) pada arsitektur Mamba \cite{gu2024mamba, yue2024medmamba}, temuan investigasi integritas dataset medis terkait \textit{data leakage} dan duplikasi \cite{abhishek2025investigating}, paradigma \textit{Supervised Contrastive Learning} (SupCon) untuk ekstraksi representasi fitur yang robust \cite{khosla2020supervised}, teknik penanganan \textit{imbalanced data} melalui \textit{Class-Weighted Loss} dan augmentasi hibrida \cite{salmi2024imbalanced, qi2025mediaug}, serta metrik evaluasi keandalan klinis seperti \textit{Expected Calibration Error} (ECE) \cite{guo2017calibration} dan metrik efisiensi \textit{hardware} \cite{lavaei2025resource}. Tahap studi literatur ini bertujuan untuk membangun landasan teoritis yang kokoh serta memberikan kerangka acuan yang valid dalam menyusun skenario eksperimen dan menganalisis hasil pengujian. \par
+Tahap studi literatur dilakukan dengan mengkaji landasan akademis yang mencakup: prinsip dasar pemodelan sekuensial State Space Models dan mekanisme pemindaian selektif Mamba (S6) \cite{gu2024mamba, yue2024medmamba}, bukti empiris kebocoran data pada benchmark medis \cite{abhishek2025investigating}, formulasi manifold representasi kontrastif terawasi (SupCon) \cite{khosla2020supervised}, teknik penanganan ketidakseimbangan kelas berbasis bobot penalti terbalik \cite{cui2019classbalanced, salmi2024imbalanced}, serta metrik evaluasi diagnostik dan kalibrasi probabilitas klinis (ECE) \cite{gorodkin2004mcc, guo2017calibration}. \par
 
 \subsection{Akuisisi Dataset} \label{III.Akuisisi}
-Proses pengumpulan data dalam penelitian ini dilakukan dengan mengunduh dataset publik dari repositori resmi Zenodo dan MedMNIST \cite{yang2023medmnist}. Tiga himpunan data utama yang diakuisisi meliputi \textit{DermaMNIST-C}, \textit{Fitzpatrick17k-C}, dan \textit{DermaMNIST-origin}. Dataset \textit{DermaMNIST-C} terdiri dari 10.015 citra dermatoskopi yang telah dibersihkan dari kebocoran data menggunakan pemisahan terisolasi di tingkat pasien/lesi (\textit{lesion-level disjoint split}) \cite{abhishek2025investigating}. Dataset \textit{Fitzpatrick17k-C} berisi 11.394 citra medis klinis (\textit{in-the-wild}) yang telah dibersihkan dari duplikasi dan kesalahan label, serta dilengkapi dengan anotasi skala warna kulit \textit{Fitzpatrick Skin Tone} (FST I--VI) dan partisi baku \textit{train-validation-test} (70:10:20) \cite{abhishek2025investigating, groh2021evaluating}. Sementara itu, dataset \textit{DermaMNIST-origin} diikutsertakan secara khusus sebagai pembanding untuk mengkuantifikasi secara eksperimental seberapa besar dampak kebocoran data terhadap inflasi skor akurasi model. \par
+Dataset yang digunakan dalam penelitian ini adalah \textbf{DermaMNIST-C} yang diakuisisi dari repositori resmi Zenodo konsorsium audit data medis \cite{abhishek2025investigating}. Dataset ini terdiri dari 10.015 citra dermatoskopi terstandarisasi yang dibagi ke dalam 7 kategori diagnosis medis. Seluruh citra telah terbebas dari kebocoran data melalui penerapan pemisahan terisolasi di tingkat lesi/pasien (\textit{lesion-level disjoint split}) dengan pembagian partisi baku: 8.215 data latih (\textit{train}), 573 data validasi (\textit{val}), dan 1.227 data uji (\textit{test}). Dataset diunduh langsung dalam format citra beresolusi $224 \times 224$ piksel yang dihasilkan melalui interpolasi \textit{bicubic} dari citra asli beresolusi tinggi HAM10000. \par
 
 \subsection{Preprocessing Data} \label{III.Preprocessing}
-Tahap \textit{preprocessing data} dilakukan untuk menyiapkan citra medis agar berada dalam format baku yang optimal sebelum dimasukkan ke dalam proses pelatihan model. Langkah pertama adalah penyesuaian resolusi citra (\textit{resizing}) secara langsung dari citra resolusi tinggi/asli menjadi dimensi $224 \times 224$ piksel menggunakan interpolasi \textit{bicubic}. Metode ini dipilih untuk menghindari efek pikselasi buruk dan hilangnya detail morfologi halus pada struktur lesi yang biasa terjadi pada metode \textit{upscaling nearest neighbor} \cite{abhishek2025investigating}. Langkah selanjutnya adalah normalisasi nilai intensitas piksel, di mana rentang nilai piksel $[0, 255]$ dikonversi menjadi tensor berformat \textit{floating-point} (\textit{float}) pada rentang $[0.0, 1.0]$, kemudian distandarisasi menggunakan nilai rata-rata (\textit{mean}) dan deviasi standar (\textit{standard deviation}) terhitung dari populasi dataset. \par
+Tahap pra-pemrosesan data dilakukan untuk memastikan tensor citra siap diproses oleh arsitektur model:
+\begin{enumerate}[noitemsep]
+	\item Verifikasi Dimensi: Memastikan seluruh citra berada pada dimensi seragam $224 \times 224 \times 3$ piksel RGB berformat tensor \textit{floating-point} $[0.0, 1.0]$.
+	\item Normalisasi Z-Score: Citra dinormalisasi menggunakan nilai rata-rata (\textit{mean}) dan deviasi standar (\textit{standard deviation}) saluran warna RGB. Untuk mencegah kebocoran informasi statistik (\textit{data snooping}), parameter normalisasi dihitung secara ketat \textbf{hanya dari himpunan data latih} ($\mu_{train} = [0,763, 0,538, 0,561]$ dan $\sigma_{train} = [0,140, 0,152, 0,169]$), lalu diterapkan ke himpunan validasi dan pengujian.
+\end{enumerate}
 
-\subsection{Penanganan Imbalanced Data dan Augmentasi} \label{III.Imbalanced}
-Guna mengatasi ketimpangan distribusi kelas pada dataset \textit{DermaMNIST-C}, diterapkan kombinasi strategi di tingkat fungsi kerugian dan manipulasi data latih. Pada tingkat algoritma, diterapkan \textit{Class-Weighted Cross-Entropy Loss} ($\mathcal{L}_{CWCE}$) yang secara otomatis menghitung bobot penalti terbalik berdasarkan frekuensi kemunculan sampel pada tiap kelas, sehingga memaksa gradien model untuk memberikan perhatian lebih pada kelas-kelas minoritas \cite{salmi2024imbalanced}. Pada tingkat data, diterapkan teknik \textit{Hybrid Data Augmentation} secara khusus pada porsi data latih kelas minoritas (seperti \texttt{df}, \texttt{vasc}, dan \texttt{akiec}). Teknik augmentasi hibrida ini menggabungkan transformasi geometris mencakup pencerminan acak (\textit{Random Horizontal/Vertical Flip}) dan rotasi acak hingga 20 derajat, dengan transformasi fotometrik berupa manipulasi warna (\textit{Color Jitter}) serta penghapusan daerah piksel acak (\textit{Random Erasing}). Penerapan teknik ini bertujuan untuk memperkaya variasi visual sampel minoritas tanpa mengubah label biologisnya \cite{qi2025mediaug}. \par 
+\subsection{Augmentasi Data dan Penanganan Data Tak Seimbang} \label{III.Imbalanced}
+Guna memastikan komparasi yang adil (\textit{ceteris paribus}) dan memenuhi kaidah metodologi kedua paradigma pelatihan, strategi penanganan data dirancang secara sistematis:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Augmentasi Stokastik Seragam}: Pipeline transformasi stokastik diterapkan secara identik ke seluruh sampel dari semua kelas selama fase pelatihan guna memperluas variabilitas spasial dan mencegah penghafalan piksel. Transformasi mencakup: pemotongan acak berskala (\textit{Random Resized Crop}, skala $0.7 - 1.0$, rasio aspek $3/4 - 4/3$), pembalikan horizontal acak (\textit{Random Horizontal Flip}, $p=0.5$), pembalikan vertikal acak (\textit{Random Vertical Flip}, $p=0.5$), rotasi acak rentang $\pm 15^\circ$, serta manipulasi fotometrik ringan (\textit{Color Jitter}: kecerahan=0.1, kontras=0.1, saturasi=0.1).
+	\item \textbf{Pemuatan Batch Acak Seragam dan Pembentukan Multi-View SupCon}: Untuk menjaga agar efek paradigma tidak tercampur (\textit{confounded}) dengan artefak teknik sampling, kedua paradigma menggunakan strategi pemuatan batch yang identik, yaitu \textbf{\textit{Uniform Random Mini-Batch Sampling}} tanpa melakukan \textit{oversampling} minoritas buatan. Dengan strategi ini, definisi satu epoch tetap terjaga secara konsisten dan terukur ($N_{train} = 8.215$ citra unik per epoch atau 257 iterasi pada ukuran batch $N=32$). Khusus pada paradigma SupCon, setiap citra dalam batch ditransformasi dua kali secara independen melalui pipeline augmentasi stokastik di atas, menghasilkan $2N = 64$ tampilan per batch. Berdasarkan formulasi Khosla et al. (2020) \cite{khosla2020supervised}, setiap sampel $i$ dijamin memiliki minimal satu pasangan positif, yaitu tampilan teraugmentasi dirinya sendiri ($|P(i)| \ge 1$), serta berpasangan dengan sampel sekelas lainnya yang hadir secara natural dalam batch.
+	\item \textbf{Penanganan Ketidakseimbangan Kelas pada Fungsi Kerugian}: Mengingat distribusi sampling dibiarkan alami tanpa sintesis data asimetris, ketimpangan proporsi kelas ditangani murni pada level fungsi objektif menggunakan \textit{Class-Weighted Cross-Entropy Loss} ($\mathcal{L}_{CWCE}$) \cite{cui2019classbalanced, salmi2024imbalanced}, di mana bobot penalti dihitung berdasarkan frekuensi terbalik sampel latih:
+	\begin{equation}
+		w_k = \frac{N_{train}}{K \cdot N_{train, k}}
+	\end{equation}
+	sehingga kesalahan prediksi pada kelas minoritas seperti \texttt{df} ($N_{train, df}=94$) dan \texttt{vasc} ($N_{train, vasc}=115$) mendapatkan bobot gradien penalti puluhan kali lebih besar dibandingkan kelas mayoritas \texttt{nv} ($N_{train, nv}=5.500$).
+\end{enumerate}
 
 \subsection{Perancangan Model dan Skenario Pelatihan} \label{III.Perancangan}
-Tahap perancangan model diawali dengan mengonfigurasi tiga skala arsitektur \textit{Visual State Space Model} (MedMamba) \cite{yue2024medmamba}, yaitu \textit{MedMamba-T} ($\sim$14,5M parameter) sebagai pembanding \textit{lightweight}, \textit{MedMamba-S} ($\sim$22,8M parameter) sebagai fokus utama penelitian, dan \textit{MedMamba-B} ($\sim$47,1M parameter) sebagai \textit{baseline upper-bound}. Pelatihan dilakukan dalam dua paradigma terpisah: \textit{Supervised Learning} terawasi langsung dan \textit{Supervised Contrastive Learning} (SupCon). Pada paradigma SupCon, \textit{backbone} MedMamba dilatih terlebih dahulu pada tahap \textit{pre-training} untuk memetakan proyeksi fitur ke dalam ruang laten menggunakan \textit{contrastive loss}, sebelum dilanjutkan dengan \textit{fine-tuning} pada lapisan klasifikasi linier. Proses pelatihan dieksekusi menggunakan \textit{AdamW optimizer}, \textit{Cosine Annealing Learning Rate Scheduler}, dan optimasi \textit{Automatic Mixed Precision} (AMP) FP16 untuk menghemat memori. Untuk menjamin reproduksibilitas dan kestabilan hasil statistik, penguncian benih acak (\textit{multi-seed}) diterapkan, serta pengujian berbasis \textit{5-Fold Cross Validation} dijalankan pada dataset yang tidak memiliki pemisahan baku. \par
+Tahap perancangan model mengevaluasi tiga skala arsitektur MedMamba \cite{yue2024medmamba}: MedMamba-T ($\sim$14,5M parameter), MedMamba-S ($\sim$22,8M parameter), dan MedMamba-B ($\sim$47,1M parameter), serta menyertakan model konvensional ResNet-18 ($\sim$11,2M parameter) sebagai baseline pembanding. \par
+
+Model dilatih di bawah dua paradigma:
+\begin{enumerate}[noitemsep]
+	\item Paradigma Supervised Learning: Model dilatih secara langsung menggunakan optimizer AdamW, penjadwal laju pembelajaran Cosine Annealing, dan fungsi kerugian $\mathcal{L}_{CWCE}$.
+	\item Paradigma Supervised Contrastive Learning (SupCon): Terdiri dari tahap pre-training representasi laten menggunakan SupCon loss ($\tau = 0,07$), dilanjutkan tahap linear evaluation / fine-tuning menggunakan classifier linier 7 kelas.
+\end{enumerate}
+Untuk menjamin validitas dan mencegah kebocoran data, penelitian ini tidak menggunakan k-fold cross validation acak, melainkan mengeksekusi pelatihan secara ketat pada partisi baku terisolasi lesi DermaMNIST-C dengan protokol penguncian benih acak (\textit{multi-seed}: seed 42, 123, 2026), di mana seluruh metrik dilaporkan dalam format nilai rata-rata dan deviasi standar (\textit{mean} $\pm$ \textit{std}). \par
 
 \subsection{Evaluasi Model} \label{III.Evaluasi}
-Tahap evaluasi dilakukan untuk mengukur dan menganalisis kinerja model yang telah dilatih berdasarkan tiga dimensi utama \cite{grandini2020metrics}. Dimensi pertama adalah performa diagnostik klinis multikelas yang diukur menggunakan metrik \textit{Balanced Accuracy}, \textit{Macro Precision}, \textit{Macro Recall}, \textit{Macro F1-Score}, serta \textit{Matthews Correlation Coefficient} (MCC) untuk menjamin penilaian yang adil pada kondisi \textit{imbalanced class}. Dimensi kedua adalah reliabilitas kalibrasi prediksi yang diukur melalui \textit{Expected Calibration Error} (ECE) guna menilai sejauh mana tingkat kepercayaan prediksi (\textit{confidence score}) model selaras dengan akurasi aktualnya. Dimensi ketiga adalah efisiensi komputasi fisik yang diukur secara langsung pada GPU laptop NVIDIA RTX 2050 (4 GB VRAM), meliputi konsumsi VRAM puncak (\textit{peak VRAM}), latensi inferensi per sampel (ms), \textit{throughput} (citra/detik), serta jumlah parameter terparameterisasi dan GFLOPs. \par
+Model yang telah dilatih dievaluasi secara komprehensif pada himpunan data uji baku (1.227 citra) berdasarkan tiga pilar metrik:
+\begin{enumerate}[noitemsep]
+	\item Performa Diagnostik Multikelas: Balanced Accuracy, Macro Precision, Macro Recall, Macro F1-Score, dan Multiclass Matthews Correlation Coefficient (MCC).
+	\item Reliabilitas Kalibrasi Prediksi: Expected Calibration Error (ECE) dengan 10 bin interval kepercayaan serta Brier Score.
+	\item Efisiensi Komputasi Hardware: Jumlah parameter, GFLOPs, latensi inferensi per sampel pada batch=1 (ms), throughput (citra/detik), dan alokasi memori VRAM puncak.
+\end{enumerate}
 
 \section{Alat dan Bahan Tugas Akhir} \label{III.Alat dan Bahan}
-Berisi alat-alat dan bahan-bahan yang digunakan dalam penelitian. \par
+Bagian ini merinci spesifikasi perangkat keras, perangkat lunak, dan bahan data yang digunakan dalam pelaksanaan eksperimen. \par
 
 \subsection{Alat} \label{III.Alat}
-Berikut merupakan alat-alat yang digunakan dalam pelaksanaan penelitian: \par
+Alat yang digunakan dalam penelitian ini meliputi:
 \begin{enumerate}[noitemsep]
-	\item \textit{Laptop} yang dilengkapi dengan unit pemroses grafis NVIDIA GeForce RTX 2050 Laptop GPU berkapasitas memori 4 GB GDDR6 VRAM berbasis arsitektur Ampere dengan \textit{Compute Capability} 8.6. Perangkat keras pendukung mencakup pemroses utama \textit{multi-core} dan memori sistem sebesar 16 GB RAM DDR4.
-	\item Arch Linux
-	\item Github
-	\item Python 3.10
-	\item CUDA Toolkit 12.1
-	\item Code editor Microsoft Visual Studio Code, Google Colab, dan Kaggle Notebook 
-	\item Library Python: PyTorch, numpy, pandas, scikit-learn, matplotlib, seaborn.
+	\item Perangkat Keras Komputasi (Server GPU): Unit pemroses grafis NVIDIA Tesla T4 dengan kapasitas memori 16 GB GDDR6 VRAM berbasis arsitektur Turing (\textit{Compute Capability} 7.5) pada lingkungan komputasi cloud (Google Colab / Kaggle).
+	\item Sistem Operasi Linux Ubuntu (cloud instance) / Arch Linux (workstation lokal).
+	\item Laptop
+	\item Python 3.10.
+	\item Pustaka perangkat lunak: PyTorch 2.x, Torchvision, CUDA Toolkit 12.x, pustaka resmi \texttt{mamba-ssm}, \texttt{causal-conv1d}, NumPy, Pandas, Scikit-learn, Matplotlib, Seaborn, dan Timm.
 \end{enumerate}
 
 \subsection{Bahan Penelitian} \label{III.Bahan}
-Bahan utama yang digunakan dalam penelitian ini terdiri dari tiga himpunan data citra medis publik serta satu bobot \textit{pretrained}. Bahan pertama adalah dataset \textit{DermaMNIST-C} yang berisi 10.015 citra dermatoskopi terkoreksi dan bebas dari kebocoran data melalui pemisahan terisolasi di tingkat pasien/lesi (\textit{lesion-level disjoint split}) \cite{abhishek2025investigating}. Bahan kedua adalah dataset \textit{Fitzpatrick17k-C} yang mencakup 11.394 citra medis klinis (\textit{in-the-wild}) terkoreksi, bebas dari duplikasi dan kesalahan label, serta dilengkapi dengan anotasi warna kulit \textit{Fitzpatrick Skin Tone} (FST I--VI) \cite{groh2021evaluating}. Bahan ketiga adalah dataset \textit{DermaMNIST-origin} yang diikutsertakan secara khusus untuk menguji dampak langsung kebocoran data. Bahan terakhir adalah bobot \textit{pretrained} \texttt{Medmamba.pth} \cite{yue2024medmamba} yang diuji pemuatannya secara parsial (\textit{partial initialization}) untuk dibandingkan efektivitasnya terhadap pelatihan dari awal (\textit{random initialization}). \par
+Bahan yang digunakan dalam penelitian ini adalah:
+\begin{enumerate}[noitemsep]
+	\item Dataset DermaMNIST-C: Berkas format arsip NPZ resmi yang memuat pasangan matriks citra $224 \times 224 \times 3$ dan label kategori medis 7 kelas, terbagi baku atas 8.215 citra latih, 573 citra validasi, dan 1.227 citra uji \cite{abhishek2025investigating}. Seluruh citra telah terbebas dari kebocoran data melalui penerapan pemisahan terisolasi di tingkat lesi (\textit{lesion-level disjoint split}) dan interpolasi \textit{bicubic} langsung dari citra resolusi tinggi HAM10000.
+\end{enumerate}
+
+\subsection{Kelayakan Eksperimen dan Anggaran Komputasi} \label{III.AnggaranKomputasi}
+Guna memastikan bahwa seluruh rangkaian pengujian dapat diselesaikan secara realistis dalam batasan kuota lingkungan komputasi cloud (Google Colab / Kaggle yang menyediakan alokasi GPU sekitar 30 jam per minggu), anggaran komputasi dihitung secara terperinci:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Total Beban Pelatihan}: Skenario pengujian faktorial $3 \times 2$ ditambah baseline ResNet-18 dieksekusi dengan $N=3$ benih acak independen, menghasilkan total 21 kali pelatihan penuh:
+	\begin{itemize}[noitemsep]
+		\item Paradigma Supervised (4 model $\times$ 3 seed = 12 run): 50 epoch per run (total 600 epoch).
+		\item Paradigma SupCon (3 model MedMamba $\times$ 3 seed = 9 run): Tahap 1 (50 epoch) + Tahap 2 (30 epoch) = 80 epoch per run (total 720 epoch).
+		\item Total kumulatif pelatihan: 21 run mencakup 1.320 epoch.
+	\end{itemize}
+	\item \textbf{Waktu Eksekusi dan Throughput}: Pada GPU NVIDIA Tesla T4 (16 GB GDDR6), estimasi waktu pelatihan per epoch untuk model terbesar (MedMamba-B, batch size 32 atau 64 view pada SupCon) dengan akselerasi FP16 berkisar antara $45 - 55$ detik. Total waktu komputasi murni untuk seluruh 21 run diestimasikan sebesar $\approx 18 - 20$ jam GPU.
+	\item \textbf{Strategi Eksekusi}: Eksperimen dijalankan secara modular menggunakan mekanisme penyimpanan checkpoint berkala (\textit{checkpointing}), sehingga proses pelatihan dapat dilanjutkan secara transparan antar-sesi tanpa risiko kehilangan progres akibat batasan durasi sesi (\textit{session timeout}).
+\end{enumerate}
 
 \section{Metode Pengembangan} \label{III.Metode}
-Metode pengembangan sistem berfokus pada perancangan arsitektur model \textit{State Space Models}, penerapan paradigma pelatihan terawasi dan kontrastif, serta strategi mitigasi ketidakseimbangan data medis. \par
+Bagian ini menguraikan spesifikasi teknis arsitektur model MedMamba, rancangan protokol kedua paradigma pelatihan, serta mekanisme pembobotan kelas. \par
 
-\subsection{Arsitektur Model MedMamba} \label{III.ArsitekturMedMamba}
-Arsitektur MedMamba menggabungkan lapisan konvolusi untuk ekstraksi fitur lokal spasial dengan modul \textit{Visual State Space} (VSSM). Modul VSSM mengintegrasikan \textit{Cross-Scan Module} (CSM) \cite{liu2024vmamba} yang memindai citra 2D secara linier $\mathcal{O}(N)$ ke empat arah spasial mendatar dan tegak guna memodelkan konteks global tanpa beban memori kuadratik $\mathcal{O}(N^2)$ seperti pada \textit{Vision Transformer} (ViT). Penelitian ini menguji tiga varian skala MedMamba untuk memetakan \textit{trade-off} antara kapasitas parameter dan efisiensi komputasi, meliputi \textit{MedMamba-T} (\textit{Tiny}) dengan kedalaman \texttt{depths = } dan dimensi \texttt{dims = } ($\sim$14,5M parameter) sebagai pembanding \textit{lightweight}, \textit{MedMamba-S} (\textit{Small}) dengan kedalaman \texttt{depths = } dan dimensi \texttt{dims = } ($\sim$22,8M parameter) sebagai fokus utama penelitian, serta \textit{MedMamba-B} (\textit{Base}) dengan kedalaman \texttt{depths = } dan dimensi \texttt{dims = } ($\sim$47,1M parameter) sebagai \textit{baseline upper-bound}. \par
+\subsection{Spesifikasi Arsitektur Model MedMamba} \label{III.ArsitekturMedMamba}
+Arsitektur MedMamba \cite{yue2024medmamba} dibangun atas susunan hierarkis 4 stage pemrosesan dengan lapisan pereduksi resolusi spasial (\textit{Patch Embedding} ukuran $4 \times 4$ dan \textit{Patch Merging}). Setiap stage terdiri dari serangkaian blok residual \textbf{SS-Conv-SSM} yang mengintegrasikan konvolusi grup 2D dengan \textit{Visual State Space Module} (VSSM) berbasis \textit{Cross-Scan Module} 4-arah ber-kompleksitas linear $\mathcal{O}(N)$ \cite{liu2024vmamba}. \par
 
-\subsection{Supervised vs. Contrastive Learning} \label{III.ParadigmaPelatihan}
-Pelatihan model dikembangkan melalui dua paradigma utama. Paradigma pertama adalah \textit{Supervised Learning} langsung yang melatih model secara \textit{end-to-end} menggunakan \textit{Class-Weighted Cross-Entropy Loss} ($\mathcal{L}_{CWCE}$) dengan pengoptimasi \textit{AdamW}, penjadwal \textit{Cosine Annealing Learning Rate} dengan $T_{max}$ terikat durasi epoch, serta optimasi \textit{Automatic Mixed Precision} (AMP) FP16 untuk menjamin efisiensi alokasi memori VRAM. Paradigma kedua adalah \textit{Supervised Contrastive Learning} (SupCon) \cite{khosla2020supervised} yang dibagi ke dalam dua tahap. Pada tahap pertama, \textit{backbone} MedMamba dilatih menggunakan \textit{SupCon Loss} dengan parameter temperatur $\tau = 0,07$ untuk mendekatkan vektor representasi fitur dari kelas yang sama dan memisahkan kelas yang berbeda di ruang laten. Pada tahap kedua, lapisan klasifikasi linier dipasang di atas \textit{backbone} terfasilitasi tersebut untuk mengeksekusi prediksi label target secara langsung. \par
+Konfigurasi teknis dari ketiga varian MedMamba yang dievaluasi dirinci sebagai berikut:
+\begin{enumerate}[noitemsep]
+	\item \textbf{MedMamba-T (\textit{Tiny})}:
+	\begin{itemize}[noitemsep]
+		\item Kedalaman blok per stage: \texttt{depths = [2, 2, 4, 2]}
+		\item Dimensi kanal per stage: \texttt{dims = [96, 192, 384, 768]}
+		\item Jumlah parameter terparameterisasi (7 kelas): $\sim$14,5 Juta parameter.
+	\end{itemize}
+	\item \textbf{MedMamba-S (\textit{Small})} (Model Fokus):
+	\begin{itemize}[noitemsep]
+		\item Kedalaman blok per stage: \texttt{depths = [2, 2, 8, 2]}
+		\item Dimensi kanal per stage: \texttt{dims = [96, 192, 384, 768]}
+		\item Jumlah parameter terparameterisasi (7 kelas): $\sim$22,8 Juta parameter.
+	\end{itemize}
+	\item \textbf{MedMamba-B (\textit{Base})}:
+	\begin{itemize}[noitemsep]
+		\item Kedalaman blok per stage: \texttt{depths = [2, 2, 12, 2]}
+		\item Dimensi kanal per stage: \texttt{dims = [128, 256, 512, 1024]}
+		\item Jumlah parameter terparameterisasi (7 kelas): $\sim$47,1 Juta parameter.
+	\end{itemize}
+\end{enumerate}
+Sebagai pembanding dasar arsitektur CNN konvensional, digunakan model ResNet-18 dengan parameter $\sim$11,2 Juta parameter. Seluruh model skala MedMamba dilatih sepenuhnya dari inisialisasi bobot acak (\textit{random initialization} / \textit{from scratch}) untuk memastikan perbandingan kapasitas yang adil. Lapisan konvolusi diinisialisasi menggunakan metode Kaiming Normal, dan proyeksi linier standar menggunakan Truncated Normal ($\sigma=0,02$), dengan mempertahankan inisialisasi matematis khusus bawaan Mamba pada parameter \textit{Selective Scan} (proyeksi $\mathbf{\Delta}$, matriks transisi keadaan kontinu $\mathbf{A}$, dan vektor bias $\mathbf{D}$) \cite{gu2024mamba}. \par
 
-\subsection{Strategi Mitigasi Data Tak Seimbang} \label{III.StrategiMitigasi}
-Strategi penanganan data tak seimbang dikembangkan pada dua tingkatan terpisah. Pada tingkat algoritma, bobot penalti fungsi kerugian dihitung secara otomatis berdasarkan frekuensi terbalik populasi kelas untuk memberikan penalti gradien yang lebih besar pada kesalahan prediksi kelas langka \cite{cui2019classbalanced}. Pada tingkat manipulasi data, diterapkan teknik \textit{Hybrid Data Augmentation} secara khusus pada porsi data latih kelas minoritas seperti \texttt{df}, \texttt{vasc}, dan \texttt{akiec}. Augmentasi hibrida menggabungkan pembalikan acak (\textit{Random Horizontal/Vertical Flip}) dan rotasi acak hingga 20 derajat untuk variasi geometris, serta manipulasi warna (\textit{Color Jitter}) dan penghapusan daerah piksel acak (\textit{Random Erasing}) untuk meningkatkan variasi fotometrik tanpa merusak informasi morfologi lesi \cite{shorten2019survey}. \par
+\subsection{Implementasi Paradigma Pelatihan} \label{III.ParadigmaPelatihan}
+Pelatihan model dikembangkan melalui dua paradigma utama:
+
+\subsubsection{Supervised Learning}
+Model klasifikasi dilatih secara \textit{end-to-end} dari citra input menuju klasifikasi 7 kelas:
+\begin{itemize}[noitemsep]
+	\item Loss Function: \textit{Class-Weighted Cross-Entropy Loss} ($\mathcal{L}_{CWCE}$).
+	\item Optimizer: AdamW dengan \textit{weight decay} $1 \times 10^{-4}$ dan \textit{initial learning rate} $\eta = 1 \times 10^{-4}$.
+	\item Learning Rate Scheduler: \textit{Cosine Annealing Learning Rate Scheduler} dengan $T_{max} = 50$ epoch dan $\eta_{min} = 1 \times 10^{-6}$.
+	\item Batch Size: 32 sampel citra per batch.
+	\item Presisi Pelatihan: \textit{Automatic Mixed Precision} (AMP) FP16 untuk mempercepat komputasi dan menghemat penggunaan VRAM.
+\end{itemize}
+
+\subsubsection{Supervised Contrastive Learning (SupCon)}
+Paradigma SupCon dieksekusi melalui protokol dua tahap terstruktur:
+\begin{itemize}[noitemsep]
+	\item \textbf{Tahap 1 (Contrastive Pre-training)}:
+	\begin{enumerate}[noitemsep]
+		\item Pasang \textit{Projection Head} non-linier 2-layer MLP di atas backbone MedMamba: Lapisan Linier ($d_{in} \rightarrow 512$) $\rightarrow$ ReLU $\rightarrow$ Lapisan Linier ($512 \rightarrow 128$) $\rightarrow$ Normalisasi L2 ($\|z\|_2 = 1$).
+		\item Untuk setiap batch berukuran $N=32$, hasilkan $2N=64$ tampilan teraugmentasi secara stokastik.
+		\item Hitung fungsi kerugian SupCon dengan parameter temperatur $\tau = 0,07$:
+		\begin{equation}
+			\mathcal{L}_{SupCon} = \sum_{i=1}^{2N} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(z_i \cdot z_p / 0,07)}{\sum_{a \in A(i)} \exp(z_i \cdot z_a / 0,07)}
+		\end{equation}
+		\item Latih backbone dan projection head selama 50 epoch menggunakan AdamW ($\eta = 1 \times 10^{-4}$).
+	\end{enumerate}
+	\item \textbf{Tahap 2 (Linear Classification Training)}:
+	\begin{enumerate}[noitemsep]
+		\item Lepaskan \textit{Projection Head}, pasang lapisan klasifikasi linier (\textit{Linear Classifier}) berdimensi output 7 kelas langsung di atas fitur representasi backbone ($d_{in} \rightarrow 7$).
+		\item Latih lapisan klasifikasi menggunakan fungsi kerugian $\mathcal{L}_{CWCE}$ selama 30 epoch. Pada evaluasi primer, backbone dibekukan (\textit{linear probing}) untuk mengisolasi kualitas murni representasi ruang laten; pada evaluasi sekunder, seluruh jaringan di-fine-tune dengan laju belajar rendah ($\eta = 1 \times 10^{-5}$).
+	\end{enumerate}
+\end{itemize}
 
 \section{Rancangan Pengujian dan Skema Eksperimen} \label{III.RancanganPengujian}
-Rancangan pengujian disusun ke dalam lima skenario eksperimen utama untuk menjawab seluruh hipotesis penelitian secara komprehensif. Skenario pertama adalah \textit{In-Dataset Benchmark} yang mengevaluasi performa dasar ketiga varian MedMamba pada data bersih menggunakan pengujian \textit{5-Fold Cross Validation} pada \textit{DermaMNIST-C} dan pembagian partisi baku 70:10:20 pada \textit{Fitzpatrick17k-C}. Skenario kedua adalah \textit{Leakage Impact Test} yang melatih model pada \textit{DermaMNIST-origin} kemudian mengujinya pada \textit{DermaMNIST-C} dan \textit{Fitzpatrick17k-C} guna mengkuantifikasi secara mendalam seberapa besar persentase akurasi yang terinflasi akibat kebocoran data. \par
+Rancangan eksperimen disusun ke dalam tiga skenario utama berdesain faktorial $3 \times 2$ (3 Skala Parameter $\times$ 2 Paradigma Pelatihan) ditambah model baseline ResNet-18 guna menjawab seluruh rumusan masalah secara komprehensif:
 
-Skenario ketiga adalah \textit{Cross-Dataset Generalization} yang menguji daya tahan transferabilitas fitur antar-domain medis secara \textit{zero-shot}, di mana model yang dilatih pada \textit{DermaMNIST-C} diuji secara langsung pada \textit{Fitzpatrick17k-C} (Arah A), dan sebaliknya model yang dilatih pada \textit{Fitzpatrick17k-C} diuji pada \textit{DermaMNIST-C} (Arah B). Skenario keempat adalah \textit{Joint-Dataset Training} yang menggabungkan populasi data latih \textit{DermaMNIST-C} dan \textit{Fitzpatrick17k-C} menjadi satu himpunan heterogen, lalu menguji performanya pada gabungan himpunan uji. Skenario kelima adalah \textit{Studi Ablasi MedMamba-S} yang dieksekusi secara terisolasi pada \textit{DermaMNIST-C} untuk membedah kontribusi spesifik dari penggunaan \textit{Class-Weighted Loss}, inisialisasi bobot (\textit{Random} vs \textit{Partial Pretrained}), serta variasi penjadwalan \textit{learning rate}. \par
+\subsection{Skenario 1: Evaluasi Skalabilitas MedMamba pada Paradigma Supervised Learning}
+Skenario ini mengevaluasi ketiga skala MedMamba (Tiny, Small, Base) yang dilatih sepenuhnya dari awal (\textit{scratch}) menggunakan paradigma Supervised Learning terbobot ($\mathcal{L}_{CWCE}$). Model ResNet-18 diikutsertakan sebagai baseline pembanding konvensional. Eksperimen ini memetakan korelasi antara penambahan kapasitas parameter model terhadap peningkatan performa metrik klinis (Balanced Accuracy, Macro-F1, Multiclass MCC) dan biaya komputasi fisik (GFLOPs, latensi inferensi, konsumsi VRAM puncak).
 
-\section{Metrik Evaluasi} \label{III.MetrikEvaluasi}
-Kinerja dari setiap model yang dievaluasi diukur dan dianalisis secara kualitatif dan kuantitatif berdasarkan tiga dimensi utama. \par
+\subsection{Skenario 2: Evaluasi Skalabilitas MedMamba pada Paradigma Supervised Contrastive Learning}
+Skenario ini mengevaluasi ketiga skala MedMamba (Tiny, Small, Base dari \textit{scratch}) di bawah paradigma SupCon dua tahap. Pengujian ini bertujuan untuk membuktikan secara empiris apakah peningkatan skala parameter SSM berkorelasi lurus dengan kualitas separabilitas representasi visual kelas minoritas pada ruang manifold laten di bawah protokol pelatihan kontrastif terawasi.
 
-\subsection{Metrik Performa Klasifikasi Multikelas} \label{III.MetrikKlasifikasi}
-Berdasarkan nilai \textit{Confusion Matrix} multikelas ($TP_c, FP_c, TN_c, FN_c$), dihitung metrik \textit{Balanced Accuracy} (Macro Recall) untuk mengukur rata-rata sensitivitas seluruh kelas tanpa terdistorsi oleh populasi mayoritas:
-\begin{equation}
-	\text{Balanced Accuracy} = \frac{1}{C} \sum_{c=1}^{C} \frac{TP_c}{TP_c + FN_c}
-\end{equation}
-Selain itu, dihitung pula metrik \textit{Macro F1-Score} untuk mengukur keseimbangan antara \textit{Precision} dan \textit{Recall} secara rata-rata tidak terbobot:
-\begin{equation}
-	\text{Macro F1-Score} = \frac{1}{C} \sum_{c=1}^{C} \frac{2 \cdot \text{Precision}_c \cdot \text{Recall}_c}{\text{Precision}_c + \text{Recall}_c}
-\end{equation}
-Untuk mengevaluasi keandalan klasifikasi multikelas pada kondisi ketimpangan kelas yang ekstrem secara lebih adil, dihitung metrik \textit{Matthews Correlation Coefficient} (MCC) \cite{chicco2023mcc}:
-\begin{equation}
-	\text{MCC} = \frac{c \cdot s - \sum_{k}^{C} p_k t_k}{\sqrt{\left(s^2 - \sum_{k}^{C} p_k^2\right) \left(s^2 - \sum_{k}^{C} t_k^2\right)}}
-\end{equation}
-di mana $c$ adalah total sampel yang terklasifikasi benar, $s$ adalah total sampel, $p_k$ adalah jumlah kali kelas $k$ diprediksi, dan $t_k$ adalah jumlah kali kelas $k$ benar-benar muncul. \par
+\subsection{Skenario 3: Analisis Komparatif Efek Interaksi Paradigma dan Skalabilitas (Paradigma \texorpdfstring{$\times$}{x} Skala)}
+Skenario ini melakukan analisis komparatif faktorial antara Skenario 1 dan Skenario 2 guna menguji hipotesis interaksi antara skala kapasitas model dan paradigma pembelajaran:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Formulasi Hipotesis Interaksi}:
+	\begin{itemize}[noitemsep]
+		\item \textit{Hipotesis Nol} ($H_0$): Peningkatan skala parameter MedMamba (dari Tiny ke Base) menghasilkan pola perubahan performa diagnostik pada kelas minoritas (\textit{Balanced Accuracy} dan \textit{Macro-F1}) yang sejajar antara paradigma \textit{Supervised Learning} dan \textit{Supervised Contrastive Learning} (tidak terdapat efek interaksi skala $\times$ paradigma).
+		\item \textit{Hipotesis Alternatif} ($H_1$): Peningkatan skala parameter MedMamba berinteraksi secara positif dengan paradigma SupCon, menghasilkan amplifikasi separabilitas ruang laten dan metrik keadilan prediksi kelas minoritas yang lebih tinggi secara signifikan dibandingkan peningkatan skala pada Supervised Learning langsung, karena representasi manifold laten SupCon mencegah penekanan fitur minoritas oleh mayoritas pada model berkapasitas besar.
+	\end{itemize}
+	\item \textbf{Kuantifikasi dan Visualisasi Ruang Laten}: Mengukur keterpisahan klaster representasi fitur lapisan akhir secara kuantitatif melalui $k$-NN Classification Accuracy ($k=5$) dan \textit{Silhouette Score}, serta didukung visualisasi reduksi dimensi t-SNE (\textit{t-Distributed Stochastic Neighbor Embedding}) untuk membandingkan kerapatan intra-kelas dan separabilitas margin antar-kelas antara kedua paradigma.
+	\item \textbf{Analisis Reliabilitas Kalibrasi Prediksi}: Mengukur nilai \textit{Expected Calibration Error} (ECE) dengan 10 interval bin dan memplot \textit{Reliability Diagram} untuk menguji apakah pemisahan representasi kontrastif menghasilkan estimasi probabilitas prediksi yang lebih terkalibrasi secara klinis dibandingkan Cross-Entropy langsung.
+	\item \textbf{Analisis Trade-Off Komputasi}: Membandingkan total waktu pelatihan, throughput pemrosesan citra, dan alokasi memori fisik antar kedua paradigma pada lingkungan komputasi GPU Tesla T4.
+\end{enumerate}
+
+\section{Metrik Evaluasi dan Protokol Validasi} \label{III.MetrikEvaluasi}
+Seluruh model pada setiap skenario dievaluasi pada himpunan data uji baku (1.227 citra) menggunakan protokol validasi ketat:
+
+\subsection{Kriteria Pemilihan Model (Model Selection) dan Protokol Konvergensi}
+Untuk menghindari anomali penghentian dini acak (\textit{premature random stopping}) yang rentan dipicu oleh fluktuasi stokastik sampel validasi minoritas yang sangat kecil ($N_{val, df}=7$ dan $N_{val, vasc}=8$), serta menjamin penjadwal laju belajar Cosine Annealing menyelesaikan kurva peluruhan hingga mencapai laju belajar minimum ($\eta_{min} = 1 \times 10^{-6}$), seluruh model dilatih dengan \textbf{alokasi anggaran 50 epoch tetap (\textit{fixed budget of 50 epochs})}. \par
+
+Protokol penentuan model checkpoint terbaik (\textit{Model Selection}) yang dievaluasi ke data uji didefinisikan secara ketat sesuai karakteristik masing-masing paradigma:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Paradigma Supervised Learning}: Checkpoint model optimal dipilih berdasarkan \textbf{nilai kerugian validasi terbobot minimum ($\mathcal{L}_{CWCE}^{val}$)}, yang dikonfirmasi kestabilan tren Macro-F1 validasinya pada rentang 10 epoch terakhir guna mencegah pemilihan model akibat lonjakan acak sesaat (\textit{stochastic spike}).
+	\item \textbf{Paradigma Supervised Contrastive Learning (SupCon)}:
+	\begin{itemize}[noitemsep]
+		\item \textit{Tahap 1 (Contrastive Pre-training, 50 epoch)}: Mengingat belum terdapat lapisan klasifikasi label pada tahap ini, checkpoint representasi encoder terbaik dipilih berdasarkan \textbf{nilai kerugian validasi SupCon minimum ($\mathcal{L}_{SupCon}^{val}$)} pada data validasi.
+		\item \textit{Tahap 2 (Linear Probing / Fine-tuning, 30 epoch)}: Checkpoint klasifikasi akhir yang diuji pada data uji dipilih berdasarkan \textbf{skor Macro-F1 validasi tertinggi}.
+	\end{itemize}
+\end{enumerate}
+
+\subsection{Metrik Performa Diagnostik Multikelas} \label{III.MetrikKlasifikasi}
+Kinerja diagnostik klinis dihitung berdasarkan matriks kontingensi multikelas (\textit{Confusion Matrix}) $\mathbf{M} \in \mathbb{R}^{K \times K}$ menggunakan metrik yang tidak terdistorsi oleh populasi kelas mayoritas:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Balanced Accuracy (Macro Recall)}: Rata-rata sensitivitas di seluruh $K=7$ kelas diagnosis.
+	\item \textbf{Macro Precision}: Rata-rata ketepatan prediksi positif di seluruh $K=7$ kelas diagnosis.
+	\item \textbf{Macro F1-Score}: Rata-rata aritmatika unweighted dari skor F1 per kelas:
+	\begin{equation}
+		\text{Macro-F1} = \frac{1}{K} \sum_{k=1}^{K} \text{F1}_k = \frac{1}{K} \sum_{k=1}^{K} \frac{2 \cdot \text{Precision}_k \cdot \text{Recall}_k}{\text{Precision}_k + \text{Recall}_k}
+	\end{equation}
+	\item \textbf{Multiclass Matthews Correlation Coefficient (MCC)}: Koefisien korelasi multikelas menurut formulasi Gorodkin (2004) \cite{gorodkin2004mcc} yang memperhitungkan seluruh elemen matriks konfusi dan terbukti paling objektif untuk dataset dengan ketidakseimbangan kelas ekstrem.
+\end{enumerate}
+
+\subsection{Kuantifikasi Separabilitas Ruang Laten} \label{III.MetrikLaten}
+Untuk melengkapi visualisasi kualitatif t-SNE, separabilitas representasi fitur laten pada lapisan sebelum klasifikasi diukur secara objektif melalui dua metrik kuantitatif:
+\begin{enumerate}[noitemsep]
+	\item \textbf{$k$-Nearest Neighbors ($k$-NN) Accuracy}: Evaluasi akurasi prediksi label kelas menggunakan algoritma $k$-NN ($k=5$) langsung pada vektor fitur laten tanpa pelatihan parameter tambahan.
+	\item \textbf{Silhouette Score}: Mengukur rasio antara jarak intra-klaster rata-rata ($a$) dan jarak antar-klaster terdekat ($b$) pada rentang $[-1, +1]$:
+	\begin{equation}
+		s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
+	\end{equation}
+	di mana skor yang mendekati $+1$ membuktikan bahwa klaster representasi kelas terpisah secara kompak dan tegas.
+\end{enumerate}
 
 \subsection{Metrik Reliabilitas Kalibrasi Prediksi} \label{III.MetrikKalibrasi}
-Guna menjamin keamanan klinis agar skor kepercayaan prediksi (\textit{confidence score}) selaras dengan akurasi aktualnya, diukur metrik \textit{Expected Calibration Error} (ECE) \cite{guo2017calibration}. Pengukuran dilakukan dengan mengelompokkan $N$ sampel ke dalam $M$ bin interval kepercayaan $B_m$ yang berjarak sama (misalnya $M = 10$):
-\begin{equation}
-	\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|
-\end{equation}
-di mana $\text{acc}(B_m)$ menyatakan akurasi aktual dalam bin $B_m$ dan $\text{conf}(B_m)$ menyatakan rata-rata nilai kepercayaan prediksi pada bin tersebut. Sebagai metrik pendukung, dihitung pula nilai \textit{Brier Loss} untuk menilai kesalahan kuadrat rata-rata antara probabilitas prediksi dengan vektor \textit{one-hot} label sebenarnya. \par
+Keandalan probabilitas keluaran model diukur melalui:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Expected Calibration Error (ECE)}: Rata-rata selisih absolut terbobot antara tingkat kepercayaan prediksi (\textit{confidence score}) dengan akurasi aktual sampel yang dikelompokkan ke dalam 10 interval bin ($M=10$) \cite{guo2017calibration}.
+	\item \textbf{Brier Score}: Kesalahan kuadrat rata-rata antara vektor probabilitas keluaran model dengan representasi \textit{one-hot} label ground-truth.
+\end{enumerate}
 
-\subsection{Metrik Efisiensi Komputasi Hardware} \label{III.MetrikKomputasi}
-Efisiensi komputasi fisik diukur secara langsung pada GPU laptop NVIDIA RTX 2050 (4 GB VRAM) mencakup empat indikator utama \cite{aalishah2025medmambalite}. Indikator pertama adalah konsumsi VRAM puncak (\textit{Peak VRAM Allocated}) yang dihitung dalam satuan megabyte/gigabyte menggunakan fungsi pemantauan memori internal PyTorch. Indikator kedua adalah latensi inferensi per sampel (\textit{Inference Latency}) yang diukur dalam milidetik (ms) pada ukuran \textit{batch} sama dengan satu. Indikator ketiga adalah \textit{Throughput} yang mengukur jumlah citra yang berhasil diproses per detik (\textit{images per second}). Indikator keempat adalah jejak fisik model yang dihitung melalui jumlah parameter terparameterisasi (dalam jutaan/M) serta total operasi titik kambang (\textit{Giga Floating Point Operations} / GFLOPs). \par
+\subsection{Metrik Efisiensi Komputasi Hardware dan Protokol Profiling} \label{III.MetrikKomputasi}
+Pengukuran efisiensi komputasi fisik dilakukan dengan protokol ketat:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Jumlah Parameter (M)}: Dihitung secara eksak dari total parameter terbobot PyTorch menggunakan fungsi \texttt{sum(p.numel() for p in model.parameters())}.
+	\item \textbf{GFLOPs}: Dihitung berdasarkan total operasi titik kambang (\textit{Floating-Point Operations}) teoritis untuk pemrosesan satu citra masukan $1 \times 3 \times 224 \times 224$. Mengingat pustaka profiler standar (seperti \texttt{fvcore} atau \texttt{thop}) tidak mampu melacak eksekusi kernel kustom CUDA C++/Triton pada operasi sekuensial rekursif Mamba (\textit{selective scan recurrence}), kalkulasi komputasi MedMamba mengintegrasikan penghitungan FLOPs teoritis resmi modul \textit{Visual State Space} (VSSM) dengan formula eksplisit $9 \times B \times L \times D \times N$ operasi FLOPs per arah pindaian (\textit{Cross-Scan 4-arah}) sesuai formulasi resmi VMamba dan MedMamba \cite{yue2024medmamba, liu2024vmamba}.
+	\item \textbf{Latensi Inferensi Batch-1 (ms)}: Waktu eksekusi inferensi pada citra tunggal ($1 \times 3 \times 224 \times 224$) menggunakan GPU NVIDIA Tesla T4. Pengukuran diawali dengan 10 iterasi pemanasan (\textit{warm-up runs}) untuk menstabilkan cache CUDA, dilanjutkan dengan 100 iterasi pengujian yang disinkronkan secara eksplisit menggunakan \texttt{torch.cuda.synchronize()}, lalu dilaporkan nilai median dan \textit{Interquartile Range} (IQR).
+	\item \textbf{Throughput}: Jumlah citra yang berhasil diproses per detik pada ukuran batch penuh saat inferensi.
+	\item \textbf{Konsumsi Memori VRAM Puncak (MB)}: Alokasi memori GPU maksimum selama proses propagasi maju dan mundur yang dicatat menggunakan fungsi internal \texttt{torch.cuda.max\_memory\_allocated()}.
+\end{enumerate}
+
+\subsection{Protokol Validasi Statistik dan Estimasi Ketidakpastian Uji} \label{III.ValidasiStatistik}
+Mengingat partisi uji baku memiliki ukuran terbatas pada kelas minoritas (\texttt{df} = 14 sampel dan \texttt{vasc} = 19 sampel), evaluasi memisahkan dua sumber variabilitas statistik secara eksplisit:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Variabilitas Optimasi (Multi-Seed Independent Replication)}: Setiap konfigurasi model dilatih menggunakan $N=3$ benih acak independen (Seed 42, 123, dan 2026) untuk merekam variabilitas stokastik proses inisialisasi bobot dan pengacakan urutan mini-batch. Hasil dilaporkan dalam format rata-rata antar-seed ($\bar{\theta} = \frac{1}{3}\sum_{s=1}^3 \theta_s$) disertai standar deviasi antar-seed ($\pm \sigma_{seed}$).
+	\item \textbf{Ketidakpastian Sampling Data Uji (Non-Parametric Bootstrap 95\% Confidence Interval)}: Untuk mengukur ketidakpastian sampling empiris pada himpunan data uji baku ($N_{test}=1.227$), dilakukan prosedur \textit{bootstrap resampling} dengan pengembalian (\textit{with replacement}) sebanyak $B=1.000$ iterasi pada prediksi model. Rentang interval kepercayaan 95\% dilaporkan dalam format $[95\% \text{ CI: batas bawah -- batas atas}]$ yang dihitung dari persentil ke-2,5 dan persentil ke-97,5 distribusi bootstrap.
+\end{enumerate}
+Format pelaporan akhir untuk seluruh metrik utama adalah:
+\begin{equation}
+	\bar{\theta} \pm \sigma_{seed} \quad [95\% \text{ CI}]
+\end{equation}
+sehingga penguji dan pembaca dapat membedakan secara tegas antara variasi kestabilan pelatihan ($\sigma_{seed}$) dan batas ketidakpastian sampling data uji ($[95\% \text{ CI}]$).
