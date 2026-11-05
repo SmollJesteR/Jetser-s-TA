@@ -1,11 +1,13 @@
 \documentclass{article}
-\usepackage[paperwidth=9.6cm,paperheight=11.2cm,margin=0.35cm]{geometry}
+\usepackage[paperwidth=15.2cm,paperheight=14cm,margin=0.5cm]{geometry}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
 
+% Color palette
 \definecolor{navy}{RGB}{15, 23, 42}
-\definecolor{borderblue}{RGB}{59, 130, 246}
+\definecolor{blueaccent}{RGB}{2, 132, 199}
 \definecolor{processblue}{RGB}{239, 246, 255}
+\definecolor{borderblue}{RGB}{59, 130, 246}
 \definecolor{tealbg}{RGB}{240, 253, 250}
 \definecolor{tealborder}{RGB}{13, 148, 136}
 \definecolor{purplebg}{RGB}{250, 245, 255}
@@ -14,92 +16,98 @@
 \definecolor{amberborder}{RGB}{217, 119, 6}
 \definecolor{rosebg}{RGB}{255, 241, 242}
 \definecolor{roseborder}{RGB}{225, 29, 72}
+\definecolor{grayborder}{RGB}{148, 163, 184}
 
 \tikzset{
     startstop/.style={
-        rectangle, rounded corners=7pt, minimum width=2.4cm, minimum height=0.48cm,
-        text centered, draw=navy, fill=navy, text=white, font=\bfseries\scriptsize,
-        inner sep=2pt
+        rectangle, rounded corners=10pt, minimum width=3.8cm, minimum height=0.75cm,
+        text centered, draw=navy, fill=navy, text=white, font=\bfseries\small
     },
     block/.style={
-        rectangle, rounded corners=4pt, minimum width=8.6cm, minimum height=0.52cm,
-        text width=8.3cm, text centered, draw=borderblue, fill=processblue,
-        font=\scriptsize\bfseries, line width=0.8pt, inner sep=3pt
+        rectangle, rounded corners=5pt, minimum width=14cm, minimum height=0.9cm,
+        text width=13.4cm, text centered, draw=borderblue, fill=processblue,
+        font=\small, line width=1pt
     },
     blocksplit/.style={
-        rectangle, rounded corners=4pt, minimum width=4.1cm, minimum height=0.68cm,
-        text width=3.9cm, text centered, font=\scriptsize\bfseries, line width=0.8pt, inner sep=2pt
+        rectangle, rounded corners=5pt, minimum width=6.8cm, minimum height=0.9cm,
+        text width=6.4cm, text centered, font=\small, line width=1pt
     },
     arrow/.style={
-        thick, -{Stealth[length=4pt, width=3pt]}, draw=navy!85, line width=0.9pt
+        thick, -{Stealth[length=5pt, width=4pt]}, draw=navy!80, line width=1.1pt
     }
 }
 
 \begin{document}
 \thispagestyle{empty}
-\centering
-\begin{tikzpicture}[node distance=0.22cm, auto]
+\noindent\centering
+\begin{tikzpicture}[node distance=0.8cm, auto]
 
     % 1. Start
     \node (start) [startstop] {MULAI};
 
     % 2. Identifikasi & Studi Literatur
-    \node (prob) [block, below = of start] {Identifikasi Masalah \& Studi Literatur};
-
-    % 3. Akuisisi Data
-    \node (data) [block, below = of prob] {Akuisisi Dataset DermaMNIST-C};
-
-    % 4. Preprocessing
-    \node (prep) [block, below = of data] {Pra-pemrosesan Citra \& Normalisasi $Z$-Score};
-
-    % 5. Augmentasi & CWCE
-    \node (aug) [block, below = of prep] {Augmentasi Stokastik \& Pembobotan Kelas};
-
-    % 6. Setup Model
-    \node (models) [block, below = of aug, fill=amberbg, draw=amberborder] {Setup Model Multiskala (MedMamba \& ResNet-18)};
-
-    % 7. Paradigma 1 vs 2
-    \node (para1) [blocksplit, fill=tealbg, draw=tealborder, anchor=north] at ($(models.south) + (-2.25cm, -0.32cm)$) {
-        Supervised Learning\\{\tiny (End-to-End)}
+    \node (prob) [block, below=0.45cm of start] {
+        \textbf{\large 1. Identifikasi Masalah \& Studi Literatur}
     };
 
-    \node (para2) [blocksplit, fill=purplebg, draw=purpleborder, anchor=north] at ($(models.south) + (+2.25cm, -0.32cm)$) {
-        Contrastive Learning\\{\tiny (SupCon 2-Tahap)}
+    % 3. Akuisisi & Preprocessing
+    \node (data) [block, below=0.5cm of prob] {
+        \textbf{\large 2. Akuisisi \& Pra-pemrosesan Data (DermaMNIST-C)}
     };
 
-    \coordinate (merge) at ($(para1.south)!0.5!(para2.south) - (0, 0.22cm)$);
+    % 4. Data Augmentation & CWCE
+    \node (aug) [block, below=0.5cm of data] {
+        \textbf{\large 3. Augmentasi Stokastik Seragam \& Pembobotan Kelas}
+    };
 
-    % 8. Evaluasi
-    \node (eval) [block, below = 0.22cm of merge, fill=rosebg, draw=roseborder] {Evaluasi Model pada Test Set Baku (1.227 Citra)};
+    % 5. Model Setup
+    \node (models) [block, below=0.5cm of aug, fill=amberbg, draw=amberborder] {
+        \textbf{\large 4. Setup Model Multiskala \& Validasi Statistik}
+    };
 
-    % 9. Analisis
-    \node (analysis) [block, below = of eval] {Analisis Komparatif Skalabilitas \& Paradigma};
+    % 6. Branching: Paradigma 1 vs Paradigma 2 (Justified to models width)
+    \node (para1) [blocksplit, anchor=north west, fill=tealbg, draw=tealborder] at ($(models.south west) + (0, -0.65cm)$) {
+        \textbf{\normalsize Paradigma 1: Supervised Learning}
+    };
 
-    % 10. Kesimpulan
-    \node (concl) [block, below = of analysis] {Penarikan Kesimpulan \& Saran};
+    \node (para2) [blocksplit, anchor=north east, fill=purplebg, draw=purpleborder] at ($(models.south east) + (0, -0.65cm)$) {
+        \textbf{\normalsize Paradigma 2: Contrastive Learning (SupCon)}
+    };
 
-    % 11. Selesai
-    \node (end) [startstop, below = of concl] {SELESAI};
+    % Dummy coordinate for merging
+    \coordinate (merge) at ($(para1.south)!0.5!(para2.south) - (0, 0.55cm)$);
+
+    % 7. Evaluasi Model
+    \node (eval) [block, below=0.55cm of merge, fill=rosebg, draw=roseborder] {
+        \textbf{\large 5. Evaluasi Komparatif pada Test Set Baku (1.227 Citra)}
+    };
+
+    % 8. Analisis & Kesimpulan
+    \node (analysis) [block, below=0.5cm of eval] {
+        \textbf{\large 6. Analisis Hasil \& Penarikan Kesimpulan}
+    };
+
+    % 9. Selesai
+    \node (end) [startstop, below=0.45cm of analysis] {SELESAI};
 
     % Connections
     \draw [arrow] (start) -- (prob);
     \draw [arrow] (prob) -- (data);
-    \draw [arrow] (data) -- (prep);
-    \draw [arrow] (prep) -- (aug);
+    \draw [arrow] (data) -- (aug);
     \draw [arrow] (aug) -- (models);
 
-    % Branching to Paradigms
-    \draw [arrow] ($(models.south) + (-2.25cm, 0)$) -- (para1.north);
-    \draw [arrow] ($(models.south) + (+2.25cm, 0)$) -- (para2.north);
+    % Branching arrows
+    \draw [arrow] (models.south -| para1.north) -- (para1.north);
+    \draw [arrow] (models.south -| para2.north) -- (para2.north);
 
-    % Merging from Paradigms
-    \draw [arrow] (para1.south) |- (merge);
-    \draw [arrow] (para2.south) |- (merge);
+    % Merging arrows
+    \draw [line width=1.1pt, draw=navy!80] (para1.south) |- (merge);
+    \draw [line width=1.1pt, draw=navy!80] (para2.south) |- (merge);
     \draw [arrow] (merge) -- (eval.north);
 
     \draw [arrow] (eval) -- (analysis);
-    \draw [arrow] (analysis) -- (concl);
-    \draw [arrow] (concl) -- (end);
+    \draw [arrow] (analysis) -- (end);
 
 \end{tikzpicture}
+\par
 \end{document}

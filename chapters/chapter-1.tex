@@ -18,7 +18,7 @@ Berdasarkan urgensi tersebut, penelitian ini dirancang untuk melakukan studi kom
 Berdasarkan latar belakang yang telah dipaparkan, rumusan masalah dalam penelitian ini adalah sebagai berikut: \par
 
 \begin{enumerate}[noitemsep]
-	\item Bagaimana efisiensi komputasi fisik (jumlah parameter, GFLOPs, latensi inferensi per sampel pada batch=1, dan konsumsi VRAM puncak) serta performa diagnostik klinis dari variasi skala arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) dibandingkan model konvensional ResNet-18 pada dataset DermaMNIST-C?
+	\item Bagaimana efisiensi komputasi fisik (jumlah parameter, GFLOPs, latensi inferensi per sampel pada batch=1, dan konsumsi VRAM puncak) serta performa diagnostik klinis dari variasi skala arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) dibandingkan model konvensional keluarga ResNet dengan parameter setara (ResNet-18, ResNet-50, dan ResNet-101) pada dataset DermaMNIST-C?
 	\item Sejauh mana perbandingan efektivitas paradigma pelatihan Supervised Learning terbobot (\textit{Class-Weighted Cross-Entropy}) dan Supervised Contrastive Learning (SupCon) dalam mengekstrak representasi fitur lesi kulit yang diskriminatif serta menghasilkan reliabilitas kalibrasi probabilitas prediksi (\textit{Expected Calibration Error} / ECE)?
 	\item Bagaimana interaksi antara variasi skala parameter arsitektur MedMamba dengan paradigma pelatihan yang diterapkan dalam mengatasi bias prediksi pada kelas-kelas penyakit kulit minoritas yang mengalami ketimpangan data ekstrem?
 \end{enumerate}
@@ -27,7 +27,7 @@ Berdasarkan latar belakang yang telah dipaparkan, rumusan masalah dalam peneliti
 Berdasarkan rumusan masalah yang telah ditetapkan, tujuan penelitian ini adalah sebagai berikut: \par
 
 \begin{enumerate}[noitemsep]
-	\item Mengimplementasikan dan mengevaluasi tiga skala arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) untuk mengidentifikasi \textit{trade-off} empiris antara kapasitas representasi, jejak komputasi, dan akurasi diagnostik terhadap baseline konvensional ResNet-18 pada dataset DermaMNIST-C.
+	\item Mengimplementasikan dan mengevaluasi tiga skala arsitektur MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) untuk mengidentifikasi \textit{trade-off} empiris antara kapasitas representasi, jejak komputasi, dan akurasi diagnostik terhadap baseline konvensional keluarga ResNet dengan parameter setara (ResNet-18, ResNet-50, dan ResNet-101) pada dataset DermaMNIST-C.
 	\item Menganalisis secara komparatif pengaruh paradigma pelatihan berbasis \textit{Class-Weighted Cross-Entropy} dan \textit{Supervised Contrastive Learning} terhadap separabilitas ruang representasi laten dan tingkat kalibrasi kepercayaan prediksi model (ECE).
 	\item Menganalisis secara komparatif efek interaksi antara variasi skala parameter arsitektur MedMamba (MedMamba-T, MedMamba-S, MedMamba-B) dan paradigma pelatihan (Supervised Learning vs. SupCon) dalam mengatasi bias prediksi pada kelas-kelas minoritas ekstrem.
 \end{enumerate}
@@ -36,7 +36,7 @@ Berdasarkan rumusan masalah yang telah ditetapkan, tujuan penelitian ini adalah 
 Berikut adalah batasan yang diberlakukan dalam penelitian ini: \par 
 
 \begin{enumerate}[noitemsep]
-    \item Arsitektur model yang dievaluasi berfokus pada keluarga MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) dengan arsitektur CNN konvensional ResNet-18 sebagai baseline pembanding.
+    \item Arsitektur model yang dievaluasi berfokus pada keluarga MedMamba (MedMamba-T, MedMamba-S, dan MedMamba-B) dengan arsitektur CNN konvensional keluarga ResNet sebagai baseline pembanding eksternal yang dipasangkan pada kapasitas parameter yang setara, yaitu ResNet-18 ($\sim$11,2M) untuk MedMamba-T ($\sim$14,5M), ResNet-50 ($\sim$23,5M) untuk MedMamba-S ($\sim$22,8M), dan ResNet-101 ($\sim$44,5M) untuk MedMamba-B ($\sim$47,1M).
     \item Dataset pengujian dibatasi secara spesifik pada citra dermatoskopi DermaMNIST-C beresolusi $224 \times 224$ piksel (7 kelas diagnosis lesi kulit) dengan menggunakan partisi baku terisolasi tingkat lesi (\textit{lesion-level disjoint split}: 8.215 data latih, 573 data validasi, dan 1.227 data uji).
     \item Seluruh varian model MedMamba dievaluasi sepenuhnya dari inisialisasi bobot acak (\textit{random initialization} / \textit{from scratch}) tanpa pemuatan bobot pra-pelatihan eksternal (\textit{pre-trained weights}) guna memastikan perbandingan skalabilitas kapasitas parameter yang adil dan murni.
     \item Paradigma pelatihan yang dikomparasikan mencakup \textit{Supervised Learning} langsung berbasis \textit{Class-Weighted Cross-Entropy Loss} dan \textit{Supervised Contrastive Learning} (SupCon dua tahap) dengan strategi augmentasi stokastik terstandarisasi seragam dan pemuatan batch acak identik (\textit{uniform random mini-batch sampling}) tanpa oversampling artifisial guna memastikan perbandingan yang adil (\textit{ceteris paribus}).

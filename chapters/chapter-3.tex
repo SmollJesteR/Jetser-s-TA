@@ -6,7 +6,7 @@ Penelitian ini dirancang secara sistematis untuk mengevaluasi skalabilitas arsit
 
 \begin{figure}[H] 
     \centering
-    \includegraphics[width=0.78\textwidth]{figure/flowchart_generator.pdf}
+    \includegraphics[width=\textwidth]{figure/flowchart_generator.pdf}
     \caption{Alur Penelitian}
     \label{fig:3.alur}
 \end{figure}
@@ -39,11 +39,12 @@ Guna memastikan komparasi yang adil (\textit{ceteris paribus}) dan memenuhi kaid
 	\begin{equation}
 		w_k = \frac{N_{train}}{K \cdot N_{train, k}}
 	\end{equation}
+	\myequations{Pembobotan Penalti Kelas pada Pelatihan Mini-Batch}
 	sehingga kesalahan prediksi pada kelas minoritas seperti \texttt{df} ($N_{train, df}=94$) dan \texttt{vasc} ($N_{train, vasc}=115$) mendapatkan bobot gradien penalti puluhan kali lebih besar dibandingkan kelas mayoritas \texttt{nv} ($N_{train, nv}=5.500$).
 \end{enumerate}
 
 \subsection{Perancangan Model dan Skenario Pelatihan} \label{III.Perancangan}
-Tahap perancangan model mengevaluasi tiga skala arsitektur MedMamba \cite{yue2024medmamba}: MedMamba-T ($\sim$14,5M parameter), MedMamba-S ($\sim$22,8M parameter), dan MedMamba-B ($\sim$47,1M parameter), serta menyertakan model konvensional ResNet-18 ($\sim$11,2M parameter) sebagai baseline pembanding. \par
+Tahap perancangan model mengevaluasi tiga skala arsitektur MedMamba \cite{yue2024medmamba}: MedMamba-T ($\sim$14,5M parameter), MedMamba-S ($\sim$22,8M parameter), dan MedMamba-B ($\sim$47,1M parameter), serta menyertakan keluarga model konvensional ResNet berparameter sepadan sebagai baseline pembanding eksternal di setiap tingkatan skala: ResNet-18 ($\sim$11,2M parameter untuk MedMamba-T), ResNet-50 ($\sim$23,5M parameter untuk MedMamba-S), dan ResNet-101 ($\sim$44,5M parameter untuk MedMamba-B). \par
 
 Model dilatih di bawah dua paradigma:
 \begin{enumerate}[noitemsep]
@@ -82,13 +83,13 @@ Bahan yang digunakan dalam penelitian ini adalah:
 \subsection{Kelayakan Eksperimen dan Anggaran Komputasi} \label{III.AnggaranKomputasi}
 Guna memastikan bahwa seluruh rangkaian pengujian dapat diselesaikan secara realistis dalam batasan kuota lingkungan komputasi cloud (Google Colab / Kaggle yang menyediakan alokasi GPU sekitar 30 jam per minggu), anggaran komputasi dihitung secara terperinci:
 \begin{enumerate}[noitemsep]
-	\item \textbf{Total Beban Pelatihan}: Skenario pengujian faktorial $3 \times 2$ ditambah baseline ResNet-18 dieksekusi dengan $N=3$ benih acak independen, menghasilkan total 21 kali pelatihan penuh:
+	\item \textbf{Total Beban Pelatihan}: Skenario pengujian faktorial $3 \times 2$ ditambah 3 baseline keluarga ResNet dieksekusi dengan $N=3$ benih acak independen, menghasilkan total 27 kali pelatihan penuh:
 	\begin{itemize}[noitemsep]
-		\item Paradigma Supervised (4 model $\times$ 3 seed = 12 run): 50 epoch per run (total 600 epoch).
+		\item Paradigma Supervised (3 model MedMamba + 3 model ResNet = 6 model $\times$ 3 seed = 18 run): 50 epoch per run (total 900 epoch).
 		\item Paradigma SupCon (3 model MedMamba $\times$ 3 seed = 9 run): Tahap 1 (50 epoch) + Tahap 2 (30 epoch) = 80 epoch per run (total 720 epoch).
-		\item Total kumulatif pelatihan: 21 run mencakup 1.320 epoch.
+		\item Total kumulatif pelatihan: 27 run mencakup 1.620 epoch.
 	\end{itemize}
-	\item \textbf{Waktu Eksekusi dan Throughput}: Pada GPU NVIDIA Tesla T4 (16 GB GDDR6), estimasi waktu pelatihan per epoch untuk model terbesar (MedMamba-B, batch size 32 atau 64 view pada SupCon) dengan akselerasi FP16 berkisar antara $45 - 55$ detik. Total waktu komputasi murni untuk seluruh 21 run diestimasikan sebesar $\approx 18 - 20$ jam GPU.
+	\item \textbf{Waktu Eksekusi dan Throughput}: Pada GPU NVIDIA Tesla T4 (16 GB GDDR6), estimasi waktu pelatihan per epoch untuk model terbesar (MedMamba-B, batch size 32 atau 64 view pada SupCon) dengan akselerasi FP16 berkisar antara $45 - 55$ detik, sedangkan varian ResNet berjalan lebih cepat ($\approx 20 - 30$ detik per epoch). Total waktu komputasi murni untuk seluruh 27 run diestimasikan sebesar $\approx 22 - 24$ jam GPU.
 	\item \textbf{Strategi Eksekusi}: Eksperimen dijalankan secara modular menggunakan mekanisme penyimpanan checkpoint berkala (\textit{checkpointing}), sehingga proses pelatihan dapat dilanjutkan secara transparan antar-sesi tanpa risiko kehilangan progres akibat batasan durasi sesi (\textit{session timeout}).
 \end{enumerate}
 
@@ -96,7 +97,14 @@ Guna memastikan bahwa seluruh rangkaian pengujian dapat diselesaikan secara real
 Bagian ini menguraikan spesifikasi teknis arsitektur model MedMamba, rancangan protokol kedua paradigma pelatihan, serta mekanisme pembobotan kelas. \par
 
 \subsection{Spesifikasi Arsitektur Model MedMamba} \label{III.ArsitekturMedMamba}
-Arsitektur MedMamba \cite{yue2024medmamba} dibangun atas susunan hierarkis 4 stage pemrosesan dengan lapisan pereduksi resolusi spasial (\textit{Patch Embedding} ukuran $4 \times 4$ dan \textit{Patch Merging}). Setiap stage terdiri dari serangkaian blok residual \textbf{SS-Conv-SSM} yang mengintegrasikan konvolusi grup 2D dengan \textit{Visual State Space Module} (VSSM) berbasis \textit{Cross-Scan Module} 4-arah ber-kompleksitas linear $\mathcal{O}(N)$ \cite{liu2024vmamba}. \par
+Arsitektur MedMamba \cite{yue2024medmamba} dibangun atas susunan hierarkis 4 stage pemrosesan dengan lapisan pereduksi resolusi spasial (\textit{Patch Embedding} ukuran $4 \times 4$ dan \textit{Patch Merging}). Setiap stage terdiri dari serangkaian blok residual \textbf{SS-Conv-SSM} yang mengintegrasikan konvolusi grup 2D dengan \textit{Visual State Space Module} (VSSM) berbasis \textit{Cross-Scan Module} 4-arah ber-kompleksitas linear $\mathcal{O}(N)$ \cite{liu2024vmamba}. Arsitektur model MedMamba secara rinci diilustrasikan pada Gambar \ref{fig:3.medmamba}. \par
+
+\begin{figure}[H] 
+    \centering
+    \includegraphics[width=\textwidth]{figure/medmamba.jpeg}
+    \caption{Arsitektur Model MedMamba \cite{yue2024medmamba}}
+    \label{fig:3.medmamba}
+\end{figure}
 
 Konfigurasi teknis dari ketiga varian MedMamba yang dievaluasi dirinci sebagai berikut:
 \begin{enumerate}[noitemsep]
@@ -119,7 +127,7 @@ Konfigurasi teknis dari ketiga varian MedMamba yang dievaluasi dirinci sebagai b
 		\item Jumlah parameter terparameterisasi (7 kelas): $\sim$47,1 Juta parameter.
 	\end{itemize}
 \end{enumerate}
-Sebagai pembanding dasar arsitektur CNN konvensional, digunakan model ResNet-18 dengan parameter $\sim$11,2 Juta parameter. Seluruh model skala MedMamba dilatih sepenuhnya dari inisialisasi bobot acak (\textit{random initialization} / \textit{from scratch}) untuk memastikan perbandingan kapasitas yang adil. Lapisan konvolusi diinisialisasi menggunakan metode Kaiming Normal, dan proyeksi linier standar menggunakan Truncated Normal ($\sigma=0,02$), dengan mempertahankan inisialisasi matematis khusus bawaan Mamba pada parameter \textit{Selective Scan} (proyeksi $\mathbf{\Delta}$, matriks transisi keadaan kontinu $\mathbf{A}$, dan vektor bias $\mathbf{D}$) \cite{gu2024mamba}. \par
+Sebagai pembanding dasar arsitektur CNN konvensional yang seimbang secara kapasitas, digunakan tiga varian dari keluarga ResNet: ResNet-18 ($\sim$11,2 Juta parameter) untuk membandingkan MedMamba-T, ResNet-50 ($\sim$23,5 Juta parameter) untuk MedMamba-S, dan ResNet-101 ($\sim$44,5 Juta parameter) untuk MedMamba-B. Seluruh model skala MedMamba dilatih sepenuhnya dari inisialisasi bobot acak (\textit{random initialization} / \textit{from scratch}) untuk memastikan perbandingan kapasitas yang adil. Lapisan konvolusi diinisialisasi menggunakan metode Kaiming Normal, dan proyeksi linier standar menggunakan Truncated Normal ($\sigma=0,02$), dengan mempertahankan inisialisasi matematis khusus bawaan Mamba pada parameter \textit{Selective Scan} (proyeksi $\mathbf{\Delta}$, matriks transisi keadaan kontinu $\mathbf{A}$, dan vektor bias $\mathbf{D}$) \cite{gu2024mamba}. \par
 
 \subsection{Implementasi Paradigma Pelatihan} \label{III.ParadigmaPelatihan}
 Pelatihan model dikembangkan melalui dua paradigma utama:
@@ -145,6 +153,7 @@ Paradigma SupCon dieksekusi melalui protokol dua tahap terstruktur:
 		\begin{equation}
 			\mathcal{L}_{SupCon} = \sum_{i=1}^{2N} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(z_i \cdot z_p / 0,07)}{\sum_{a \in A(i)} \exp(z_i \cdot z_a / 0,07)}
 		\end{equation}
+		\myequations{Fungsi Kerugian SupCon Multi-View Tahap 1}
 		\item Latih backbone dan projection head selama 50 epoch menggunakan AdamW ($\eta = 1 \times 10^{-4}$).
 	\end{enumerate}
 	\item \textbf{Tahap 2 (Linear Classification Training)}:
@@ -155,10 +164,10 @@ Paradigma SupCon dieksekusi melalui protokol dua tahap terstruktur:
 \end{itemize}
 
 \section{Rancangan Pengujian dan Skema Eksperimen} \label{III.RancanganPengujian}
-Rancangan eksperimen disusun ke dalam tiga skenario utama berdesain faktorial $3 \times 2$ (3 Skala Parameter $\times$ 2 Paradigma Pelatihan) ditambah model baseline ResNet-18 guna menjawab seluruh rumusan masalah secara komprehensif:
+Rancangan eksperimen disusun ke dalam tiga skenario utama berdesain faktorial $3 \times 2$ (3 Skala Parameter $\times$ 2 Paradigma Pelatihan) ditambah 3 model baseline keluarga ResNet berparameter setara guna menjawab seluruh rumusan masalah secara komprehensif:
 
 \subsection{Skenario 1: Evaluasi Skalabilitas MedMamba pada Paradigma Supervised Learning}
-Skenario ini mengevaluasi ketiga skala MedMamba (Tiny, Small, Base) yang dilatih sepenuhnya dari awal (\textit{scratch}) menggunakan paradigma Supervised Learning terbobot ($\mathcal{L}_{CWCE}$). Model ResNet-18 diikutsertakan sebagai baseline pembanding konvensional. Eksperimen ini memetakan korelasi antara penambahan kapasitas parameter model terhadap peningkatan performa metrik klinis (Balanced Accuracy, Macro-F1, Multiclass MCC) dan biaya komputasi fisik (GFLOPs, latensi inferensi, konsumsi VRAM puncak).
+Skenario ini mengevaluasi ketiga skala MedMamba (Tiny, Small, Base) yang dilatih sepenuhnya dari awal (\textit{scratch}) menggunakan paradigma Supervised Learning terbobot ($\mathcal{L}_{CWCE}$). Model keluarga ResNet (ResNet-18, ResNet-50, dan ResNet-101) diikutsertakan sebagai baseline pembanding konvensional berpasangan pada masing-masing tingkatan skala (Tiny, Small, Base). Eksperimen ini memetakan korelasi antara penambahan kapasitas parameter model terhadap peningkatan performa metrik klinis (Balanced Accuracy, Macro-F1, Multiclass MCC) dan biaya komputasi fisik (GFLOPs, latensi inferensi, konsumsi VRAM puncak).
 
 \subsection{Skenario 2: Evaluasi Skalabilitas MedMamba pada Paradigma Supervised Contrastive Learning}
 Skenario ini mengevaluasi ketiga skala MedMamba (Tiny, Small, Base dari \textit{scratch}) di bawah paradigma SupCon dua tahap. Pengujian ini bertujuan untuk membuktikan secara empiris apakah peningkatan skala parameter SSM berkorelasi lurus dengan kualitas separabilitas representasi visual kelas minoritas pada ruang manifold laten di bawah protokol pelatihan kontrastif terawasi.
@@ -201,6 +210,7 @@ Kinerja diagnostik klinis dihitung berdasarkan matriks kontingensi multikelas (\
 	\begin{equation}
 		\text{Macro-F1} = \frac{1}{K} \sum_{k=1}^{K} \text{F1}_k = \frac{1}{K} \sum_{k=1}^{K} \frac{2 \cdot \text{Precision}_k \cdot \text{Recall}_k}{\text{Precision}_k + \text{Recall}_k}
 	\end{equation}
+	\myequations{Perhitungan Macro F1-Score Evaluasi Uji}
 	\item \textbf{Multiclass Matthews Correlation Coefficient (MCC)}: Koefisien korelasi multikelas menurut formulasi Gorodkin (2004) \cite{gorodkin2004mcc} yang memperhitungkan seluruh elemen matriks konfusi dan terbukti paling objektif untuk dataset dengan ketidakseimbangan kelas ekstrem.
 \end{enumerate}
 
@@ -212,34 +222,71 @@ Untuk melengkapi visualisasi kualitatif t-SNE, separabilitas representasi fitur 
 	\begin{equation}
 		s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}
 	\end{equation}
+	\myequations{Skor Silhouette Separabilitas Ruang Laten}
 	di mana skor yang mendekati $+1$ membuktikan bahwa klaster representasi kelas terpisah secara kompak dan tegas.
 \end{enumerate}
 
 \subsection{Metrik Reliabilitas Kalibrasi Prediksi} \label{III.MetrikKalibrasi}
-Keandalan probabilitas keluaran model diukur melalui:
+Keandalan probabilitas keluaran model diukur melalui dua pilar metrik:
 \begin{enumerate}[noitemsep]
-	\item \textbf{Expected Calibration Error (ECE)}: Rata-rata selisih absolut terbobot antara tingkat kepercayaan prediksi (\textit{confidence score}) dengan akurasi aktual sampel yang dikelompokkan ke dalam 10 interval bin ($M=10$) \cite{guo2017calibration}.
-	\item \textbf{Brier Score}: Kesalahan kuadrat rata-rata antara vektor probabilitas keluaran model dengan representasi \textit{one-hot} label ground-truth.
+	\item \textbf{Expected Calibration Error (ECE)}: Rata-rata selisih absolut terbobot antara tingkat kepercayaan prediksi (\textit{confidence score}) dengan akurasi aktual sampel yang dikelompokkan ke dalam 10 interval bin ($M=10$) \cite{guo2017calibration}:
+	\begin{equation}
+		\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N_{test}} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|
+	\end{equation}
+	\myequations{Expected Calibration Error Evaluasi Uji}
+
+	\item \textbf{Brier Score}: Kesalahan kuadrat rata-rata antara vektor probabilitas keluaran model dengan representasi biner \textit{one-hot} label ground-truth \cite{brier1950verification}:
+	\begin{equation}
+		\text{Brier Score} = \frac{1}{N_{test}} \sum_{i=1}^{N_{test}} \sum_{k=1}^{K} \left(\hat{p}_{i,k} - y_{i,k}\right)^2
+	\end{equation}
+	\myequations{Brier Score Kalibrasi Probabilistik Uji}
 \end{enumerate}
 
 \subsection{Metrik Efisiensi Komputasi Hardware dan Protokol Profiling} \label{III.MetrikKomputasi}
 Pengukuran efisiensi komputasi fisik dilakukan dengan protokol ketat:
 \begin{enumerate}[noitemsep]
 	\item \textbf{Jumlah Parameter (M)}: Dihitung secara eksak dari total parameter terbobot PyTorch menggunakan fungsi \texttt{sum(p.numel() for p in model.parameters())}.
-	\item \textbf{GFLOPs}: Dihitung berdasarkan total operasi titik kambang (\textit{Floating-Point Operations}) teoritis untuk pemrosesan satu citra masukan $1 \times 3 \times 224 \times 224$. Mengingat pustaka profiler standar (seperti \texttt{fvcore} atau \texttt{thop}) tidak mampu melacak eksekusi kernel kustom CUDA C++/Triton pada operasi sekuensial rekursif Mamba (\textit{selective scan recurrence}), kalkulasi komputasi MedMamba mengintegrasikan penghitungan FLOPs teoritis resmi modul \textit{Visual State Space} (VSSM) dengan formula eksplisit $9 \times B \times L \times D \times N$ operasi FLOPs per arah pindaian (\textit{Cross-Scan 4-arah}) sesuai formulasi resmi VMamba dan MedMamba \cite{yue2024medmamba, liu2024vmamba}.
-	\item \textbf{Latensi Inferensi Batch-1 (ms)}: Waktu eksekusi inferensi pada citra tunggal ($1 \times 3 \times 224 \times 224$) menggunakan GPU NVIDIA Tesla T4. Pengukuran diawali dengan 10 iterasi pemanasan (\textit{warm-up runs}) untuk menstabilkan cache CUDA, dilanjutkan dengan 100 iterasi pengujian yang disinkronkan secara eksplisit menggunakan \texttt{torch.cuda.synchronize()}, lalu dilaporkan nilai median dan \textit{Interquartile Range} (IQR).
-	\item \textbf{Throughput}: Jumlah citra yang berhasil diproses per detik pada ukuran batch penuh saat inferensi.
+	\item \textbf{GFLOPs}: Dihitung berdasarkan total operasi titik kambang (\textit{Floating-Point Operations}) teoritis untuk pemrosesan satu citra masukan $1 \times 3 \times 224 \times 224$. Mengingat pustaka profiler standar (seperti \texttt{fvcore} atau \texttt{thop}) tidak mampu melacak eksekusi kernel kustom CUDA C++/Triton pada operasi sekuensial rekursif Mamba (\textit{selective scan recurrence}), kalkulasi komputasi MedMamba mengintegrasikan penghitungan FLOPs teoritis resmi modul \textit{Visual State Space} (VSSM) dengan formula eksplisit operasi per arah pindaian pada modul \textit{Cross-Scan} (CSM 4-arah) \cite{yue2024medmamba, liu2024vmamba}:
+	\begin{equation}
+		\text{FLOPs}_{\text{CSM}} = 4 \times (9 \cdot B \cdot L \cdot D \cdot N) = 36 \cdot B \cdot L \cdot D \cdot N
+	\end{equation}
+	\myequations{Kalkulasi FLOPs Modul Cross-Scan 4-Arah VSSM}
+	Total FLOPs dari seluruh tahapan jaringan (konvolusi stem, blok SS-Conv-SSM, downsampling, dan classifier head) kemudian dinormalisasi ke dalam satuan GFLOPs:
+	\begin{equation}
+		\text{GFLOPs} = \frac{\text{Total FLOPs}}{10^9}
+	\end{equation}
+	\myequations{Normalisasi Beban Komputasi GFLOPs Uji}
+
+	\item \textbf{Latensi Inferensi Batch-1 (ms)}: Waktu eksekusi inferensi pada citra tunggal ($1 \times 3 \times 224 \times 224$) menggunakan GPU NVIDIA Tesla T4. Pengukuran diawali dengan 10 iterasi pemanasan (\textit{warm-up runs}) untuk menstabilkan cache CUDA, dilanjutkan dengan 100 iterasi pengujian yang disinkronkan secara eksplisit menggunakan \texttt{torch.cuda.synchronize()}, lalu dilaporkan nilai median dan rentang interkuartil (\textit{Interquartile Range} / IQR) untuk menangkap dispersi tanpa terpengaruh pencilan:
+	\begin{equation}
+		\text{IQR} = Q_3 - Q_1
+	\end{equation}
+	\myequations{Dispersi Latensi Inferensi Interquartile Range}
+
+	\item \textbf{Throughput}: Jumlah citra yang berhasil diproses per satuan waktu pada ukuran batch penuh saat inferensi:
+	\begin{equation}
+		\text{Throughput} = \frac{N_{\text{batch}}}{T_{\text{inferensi}}} \quad (\text{citra/detik})
+	\end{equation}
+	\myequations{Throughput Pemrosesan Citra Inferensi Uji}
+
 	\item \textbf{Konsumsi Memori VRAM Puncak (MB)}: Alokasi memori GPU maksimum selama proses propagasi maju dan mundur yang dicatat menggunakan fungsi internal \texttt{torch.cuda.max\_memory\_allocated()}.
 \end{enumerate}
 
 \subsection{Protokol Validasi Statistik dan Estimasi Ketidakpastian Uji} \label{III.ValidasiStatistik}
 Mengingat partisi uji baku memiliki ukuran terbatas pada kelas minoritas (\texttt{df} = 14 sampel dan \texttt{vasc} = 19 sampel), evaluasi memisahkan dua sumber variabilitas statistik secara eksplisit:
 \begin{enumerate}[noitemsep]
-	\item \textbf{Variabilitas Optimasi (Multi-Seed Independent Replication)}: Setiap konfigurasi model dilatih menggunakan $N=3$ benih acak independen (Seed 42, 123, dan 2026) untuk merekam variabilitas stokastik proses inisialisasi bobot dan pengacakan urutan mini-batch. Hasil dilaporkan dalam format rata-rata antar-seed ($\bar{\theta} = \frac{1}{3}\sum_{s=1}^3 \theta_s$) disertai standar deviasi antar-seed ($\pm \sigma_{seed}$).
+	\item \textbf{Variabilitas Optimasi (Multi-Seed Independent Replication)}: Setiap konfigurasi model dilatih menggunakan $S=3$ benih acak independen (Seed 42, 123, dan 2026) untuk merekam variabilitas stokastik proses inisialisasi bobot dan pengacakan urutan mini-batch. Deviasi standar sampel antar-seed dihitung menurut:
+	\begin{equation}
+		\sigma_{seed} = \sqrt{\frac{1}{S-1} \sum_{s=1}^{S} (\theta_s - \bar{\theta})^2}
+	\end{equation}
+	\myequations{Deviasi Standar Replikasi Multi-Seed}
+	di mana $\bar{\theta} = \frac{1}{S}\sum_{s=1}^S \theta_s$ adalah nilai rata-rata estimasi performa antar-seed.
+
 	\item \textbf{Ketidakpastian Sampling Data Uji (Non-Parametric Bootstrap 95\% Confidence Interval)}: Untuk mengukur ketidakpastian sampling empiris pada himpunan data uji baku ($N_{test}=1.227$), dilakukan prosedur \textit{bootstrap resampling} dengan pengembalian (\textit{with replacement}) sebanyak $B=1.000$ iterasi pada prediksi model. Rentang interval kepercayaan 95\% dilaporkan dalam format $[95\% \text{ CI: batas bawah -- batas atas}]$ yang dihitung dari persentil ke-2,5 dan persentil ke-97,5 distribusi bootstrap.
 \end{enumerate}
 Format pelaporan akhir untuk seluruh metrik utama adalah:
 \begin{equation}
 	\bar{\theta} \pm \sigma_{seed} \quad [95\% \text{ CI}]
 \end{equation}
+\myequations{Format Pelaporan Agregat Multi-Seed dan Bootstrap CI}
 sehingga penguji dan pembaca dapat membedakan secara tegas antara variasi kestabilan pelatihan ($\sigma_{seed}$) dan batas ketidakpastian sampling data uji ($[95\% \text{ CI}]$).

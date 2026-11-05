@@ -1,0 +1,30 @@
+\contentsline {myequations}{\numberline {Rumus~2.1}Fungsi Kerugian Class-Weighted Cross-Entropy}{21}{equation.2.1}%
+\contentsline {myequations}{\numberline {Rumus~2.2}Bobot Penalti Kelas Frekuensi Terbalik}{21}{equation.2.2}%
+\contentsline {myequations}{\numberline {Rumus~2.3}Pemetaan Residual Identitas ResNet}{23}{equation.2.3}%
+\contentsline {myequations}{\numberline {Rumus~2.4}Pemetaan Residual Proyeksi Linier ResNet}{23}{equation.2.4}%
+\contentsline {myequations}{\numberline {Rumus~2.5}Sistem Persamaan Keadaan Laten Kontinu SSM}{24}{equation.2.5}%
+\contentsline {myequations}{\numberline {Rumus~2.6}Diskretisasi State Space Model dengan Zero-Order Hold}{25}{equation.2.6}%
+\contentsline {myequations}{\numberline {Rumus~2.7}Mekanisme Seleksi Parameter Masukan Mamba S6}{25}{equation.2.7}%
+\contentsline {myequations}{\numberline {Rumus~2.8}Normalisasi Vektor Proyeksi Laten SupCon}{27}{equation.2.8}%
+\contentsline {myequations}{\numberline {Rumus~2.9}Fungsi Kerugian Supervised Contrastive (SupCon)}{27}{equation.2.9}%
+\contentsline {myequations}{\numberline {Rumus~2.10}Balanced Accuracy Multikelas}{27}{equation.2.10}%
+\contentsline {myequations}{\numberline {Rumus~2.11}Macro Precision Multikelas}{27}{equation.2.11}%
+\contentsline {myequations}{\numberline {Rumus~2.12}Macro F1-Score Multikelas}{28}{equation.2.12}%
+\contentsline {myequations}{\numberline {Rumus~2.13}Multiclass Matthews Correlation Coefficient}{28}{equation.2.13}%
+\contentsline {myequations}{\numberline {Rumus~2.14}Expected Calibration Error}{28}{equation.2.14}%
+\contentsline {myequations}{\numberline {Rumus~2.15}Brier Score Kalibrasi Probabilistik}{29}{equation.2.15}%
+\contentsline {myequations}{\numberline {Rumus~2.16}Akumulasi Jumlah Parameter Terbobot}{29}{equation.2.16}%
+\contentsline {myequations}{\numberline {Rumus~2.17}Normalisasi Satuan Komputasi GFLOPs}{29}{equation.2.17}%
+\contentsline {myequations}{\numberline {Rumus~2.18}Throughput Inferensi Perangkat Keras}{29}{equation.2.18}%
+\contentsline {myequations}{\numberline {Rumus~3.1}Pembobotan Penalti Kelas pada Pelatihan Mini-Batch}{34}{equation.3.1}%
+\contentsline {myequations}{\numberline {Rumus~3.2}Fungsi Kerugian SupCon Multi-View Tahap 1}{40}{equation.3.2}%
+\contentsline {myequations}{\numberline {Rumus~3.3}Perhitungan Macro F1-Score Evaluasi Uji}{44}{equation.3.3}%
+\contentsline {myequations}{\numberline {Rumus~3.4}Skor Silhouette Separabilitas Ruang Laten}{45}{equation.3.4}%
+\contentsline {myequations}{\numberline {Rumus~3.5}Expected Calibration Error Evaluasi Uji}{45}{equation.3.5}%
+\contentsline {myequations}{\numberline {Rumus~3.6}Brier Score Kalibrasi Probabilistik Uji}{45}{equation.3.6}%
+\contentsline {myequations}{\numberline {Rumus~3.7}Kalkulasi FLOPs Modul Cross-Scan 4-Arah VSSM}{46}{equation.3.7}%
+\contentsline {myequations}{\numberline {Rumus~3.8}Normalisasi Beban Komputasi GFLOPs Uji}{46}{equation.3.8}%
+\contentsline {myequations}{\numberline {Rumus~3.9}Dispersi Latensi Inferensi Interquartile Range}{47}{equation.3.9}%
+\contentsline {myequations}{\numberline {Rumus~3.10}Throughput Pemrosesan Citra Inferensi Uji}{47}{equation.3.10}%
+\contentsline {myequations}{\numberline {Rumus~3.11}Deviasi Standar Replikasi Multi-Seed}{47}{equation.3.11}%
+\contentsline {myequations}{\numberline {Rumus~3.12}Format Pelaporan Agregat Multi-Seed dan Bootstrap CI}{48}{equation.3.12}%

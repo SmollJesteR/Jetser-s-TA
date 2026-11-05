@@ -1,8 +1,8 @@
 \section{Karakteristik dan Partisi Dataset DermaMNIST-C} \label{app:dataset}
 Dataset DermaMNIST-C \cite{abhishek2025investigating} yang digunakan dalam penelitian ini merupakan turunan langsung dari HAM10000 dengan partisi baku terisolasi lesi (\textit{lesion-level split}) beresolusi $224 \times 224 \times 3$. Distribusi frekuensi sampel per kelas pada setiap partisi disajikan untuk melengkapi analisis ketidakseimbangan data.
 
-\section{Konfigurasi Detail Arsitektur MedMamba dan ResNet-18} \label{app:arsitektur}
-Rincian dimensi kanal (\textit{dims}), jumlah blok berulang (\textit{depths}), dan mekanisme pindaian spasial empat arah (\textit{Cross-Scan Module}) pada setiap tingkatan (\textit{stage}) hierarki MedMamba-Tiny, MedMamba-Small, dan MedMamba-Base, serta arsitektur baseline ResNet-18.
+\section{Konfigurasi Detail Arsitektur MedMamba dan Keluarga ResNet} \label{app:arsitektur}
+Rincian dimensi kanal (\textit{dims}), jumlah blok berulang (\textit{depths}), dan mekanisme pindaian spasial empat arah (\textit{Cross-Scan Module}) pada setiap tingkatan (\textit{stage}) hierarki MedMamba-Tiny, MedMamba-Small, dan MedMamba-Base, serta arsitektur baseline pembanding keluarga ResNet (ResNet-18, ResNet-50, dan ResNet-101).
 
 \section{Lingkungan Perangkat Lunak dan Reproduksibilitas Eksperimen} \label{app:reproducibility}
 Rincian dependensi pustaka Python, CUDA, pustaka \texttt{mamba-ssm}, serta konfigurasi benih acak (\textit{seed} 42, 123, 2026) guna menjamin reproduksibilitas penuh seluruh skenario eksperimen.

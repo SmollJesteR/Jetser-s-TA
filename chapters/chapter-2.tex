@@ -13,7 +13,7 @@ Penelitian kecerdasan buatan dalam ranah klasifikasi citra medis dermatologi tel
 
 	\item Yue dan Li (2024) \cite{yue2024medmamba} memperkenalkan \textbf{MedMamba}, arsitektur hibrida yang menggabungkan konvolusi lokal dengan modul \textit{Visual State Space} (VSSM) berbasis pemindaian silang 4-arah (\textit{Cross-Scan Module}) yang memiliki kompleksitas linear $\mathcal{O}(N)$. MedMamba menunjukkan keunggulan akurasi dan efisiensi memori di atas ResNet dan Swin-ViT \cite{liu2021swin} pada berbagai modalitas citra medis MedMNIST. Namun, evaluasi MedMamba masih dilakukan pada partisi MedMNIST orisinal yang belum diaudit kebocorannya dan belum mengeksplorasi perbandingan empiris lintas varian skala parameter (Tiny, Small, Base). \par
 
-	\item Khosla et al. (2020) \cite{khosla2020supervised} merumuskan paradigma \textit{Supervised Contrastive Learning} (SupCon) untuk mengatasi kelemahan fungsi Cross-Entropy standar dalam membentuk batas keputusan representasi. SupCon memanfaatkan anotasi label kelas untuk menarik representasi dari kelas yang sama dan mendorong representasi kelas berbeda pada ruang manifold laten, sehingga menghasilkan representasi fitur yang lebih tangguh terhadap korupsi data. Walau demikian, keefektifan SupCon belum pernah diuji pada arsitektur Vision Mamba multiskala untuk citra dermatologi medis bersih dari kebocoran data. \par
+	\item Chen, Zhuang, dan Chang (2022) \cite{chen2022supercon} merumuskan kerangka kerja \textbf{SuperCon} (\textit{Supervised Contrastive Learning for Imbalanced Skin Lesion Classification}) yang menerapkan pembelajaran kontrastif terawasi dua tahap khusus untuk menangani ketidakseimbangan kelas ekstrem pada klasifikasi lesi kulit dermatoskopi. Tahap pertama melatih representasi ruang laten menggunakan fungsi kerugian SupCon terawasi untuk menarik representasi intra-kelas dan merenggangkan jarak inter-kelas, diikuti oleh tahap kedua berupa pelatihan lapisan klasifikasi linier. Hasil penelitian mereka membuktikan bahwa SupCon mampu meningkatkan metrik Macro-F1 dan AUC secara signifikan pada kelas-kelas lesi kulit minoritas dibandingkan fungsi Cross-Entropy standar. Namun demikian, penelitian tersebut masih terbatas pada arsitektur CNN konvensional (ResNet dan EfficientNet), belum mengeksplorasi efisiensi komputasi linear \textit{State Space Models} (MedMamba), belum mengkaji perilaku skalabilitas parameter multi-ukuran, serta masih dievaluasi pada partisi dataset yang rentan terhadap isu kebocoran data lesi. \par
 \end{enumerate}
 
 Berdasarkan kajian terhadap kelima literatur di atas,  \textit{research gap} yang diidentifikasi adalah: belum adanya penelitian komprehensif yang membedah pengaruh variasi skala parameter arsitektur MedMamba (Tiny, Small, dan Base) saat dilatih dari awal (\textit{scratch}) pada dataset dermatoskopi yang bersih dari kebocoran data (DermaMNIST-C), serta bagaimana interaksi arsitektur State Space Models tersebut ketika dilatih di bawah paradigma Supervised Learning terbobot dibandingkan paradigma Supervised Contrastive Learning (SupCon). \par
@@ -39,7 +39,7 @@ Berdasarkan kajian terhadap kelima literatur di atas,  \textit{research gap} yan
 	\hline
 	4. & Yubiao Yue, dkk. [2024] \textit{[MedMamba: Vision Mamba for Medical Image Classification]} & Kompleksitas kuadratik $\mathcal{O}(N^2)$ pada ViT membebani memori komputasi & Hibrida Conv + Visual State Space Module (VSSM) $\mathcal{O}(N)$ pada MedMNIST & Mengungguli ResNet dan Swin-ViT dalam akurasi dan memori. Pengujian masih pada MedMNIST orisinal (bocor) dan tanpa variasi skala komparatif. \\ 
 	\hline
-	5. & Khosla, dkk [2020] \textit{[Supervised Contrastive Learning]} & Keterbatasan fungsi Cross-Entropy dalam membentuk batas keputusan representasi & Pre-training kontrastif terawasi dengan loss SupCon pada ruang laten terproyeksi & Mengungguli Cross-Entropy pada ImageNet dan robust terhadap korupsi data. Belum dieksplorasi pada arsitektur Mamba di citra medis terimbangi. \\ 
+	5. & Keyu Chen, dkk. [2022] \textit{[SuperCon: Supervised Contrastive Learning for Imbalanced Skin Lesion Classification]} & Ketimpangan kelas ekstrem dan degradasi performa minoritas pada citra dermatoskopi & Pembelajaran representasi SupCon dua tahap dilanjutkan fine-tuning classifier pada data tak seimbang & Terbukti meningkatkan Macro-F1 dan AUC kelas minoritas lesi kulit. Namun terbatas pada CNN konvensional, belum menguji State Space MedMamba dan belum dievaluasi pada dataset bebas kebocoran data. \\ 
 	\hline
 \end{longtable}
 \end{landscape}
@@ -156,35 +156,77 @@ Untuk mengompensasi bias gradien tersebut, diterapkan \textit{Class-Weighted Cro
 \begin{equation}
 	\mathcal{L}_{CWCE} = -\sum_{k=1}^{K} w_k \cdot y_k \log(\hat{y}_k)
 \end{equation}
+\myequations{Fungsi Kerugian Class-Weighted Cross-Entropy}
 
 Di mana $y_k \in \{0, 1\}$ adalah label \textit{ground-truth}, $\hat{y}_k$ adalah probabilitas prediksi keluaran softmax, dan bobot kelas $w_k$ dihitung berdasarkan frekuensi terbalik sampel pada himpunan data latih \cite{cui2019classbalanced, salmi2024imbalanced}:
 \begin{equation}
 	w_k = \frac{N_{train}}{K \cdot N_{train, k}}
 \end{equation}
+\myequations{Bobot Penalti Kelas Frekuensi Terbalik}
 dengan $N_{train}$ menyatakan total sampel pada partisi latih ($N_{train} = 8.215$), $K$ adalah jumlah kelas ($K = 7$), dan $N_{train, k}$ adalah jumlah sampel latih pada kelas $k$.
 
-\subsection{Arsitektur Model CNN dan ViT} \label{II.Teori.MedMamba}
-Jaringan saraf tiruan konvolusional (CNN) mengandalkan operasi konvolusi lokal dengan bobot bersama (\textit{shared weights}), yang memberikan keunggulan induktif spasial (\textit{spatial inductive bias}) yang efisien. Namun, keterbatasan ukuran reseptif kernel menyebabkan CNN kesulitan menangkap konteks lesi yang memerlukan ketergantungan jarak jauh (\textit{long-range dependencies}) \cite{litjens2017survey}. Di sisi lain, \textit{Vision Transformer} (ViT) \cite{dosovitskiy2021image} mengatasi kelemahan tersebut dengan membagi citra menjadi sekuens patch dan menerapkan mekanisme \textit{Self-Attention} global. Akan tetapi, komputasi atensi berpasangan pada ViT menuntut biaya waktu dan memori kuadratik $\mathcal{O}(N^2)$ terhadap panjang sekuens token $N$, yang menjadi hambatan komputasi berat \cite{amangeldi2025cnn}. \par
+\subsection{Bias Induktif CNN dan Karakteristik Vision Transformer (ViT)} \label{II.Teori.CNN_ViT}
+Jaringan saraf tiruan konvolusional (\textit{Convolutional Neural Networks} / CNN) mengandalkan operasi konvolusi lokal dengan pembagian bobot (\textit{shared weights}) dan invarian translasi (\textit{translation invariance}), yang memberikan keunggulan bias induktif spasial (\textit{spatial inductive bias}) yang kokoh \cite{litjens2017survey}. Karakteristik ini memungkinkan ekstraksi fitur visual berjenjang secara efisien dari tepian primitif hingga bentuk kompleks. Namun demikian, keterbatasan bidang reseptif (\textit{receptive field}) kernel konvolusi menyebabkan CNN kesulitan menangkap konteks lesi yang membutuhkan ketergantungan jarak jauh (\textit{long-range dependencies}), kecuali melalui penumpukan lapisan yang sangat dalam atau operasi penggabungan spasial (\textit{pooling}) yang berisiko menghilangkan detail tekstur mikroskopis dermatoskopi. \par
 
+Untuk mengatasi limitasi bidang reseptif lokal tersebut, \textit{Vision Transformer} (ViT) \cite{dosovitskiy2021image} mengadaptasi mekanisme \textit{Multi-Head Self-Attention} (MHSA) dari ranah pemrosesan bahasa alami ke ranah visi komputer. Citra masukan diproyeksikan menjadi sekuens token \textit{patch} 2D, memungkinkan setiap token berinteraksi secara global dengan seluruh token lainnya di setiap lapisan. Akan tetapi, komputasi matriks atensi berpasangan pada ViT menuntut biaya waktu dan konsumsi memori berorde kuadratik $\mathcal{O}(N^2)$ terhadap panjang sekuens token $N$ \cite{amangeldi2025cnn}. Di samping itu, ketiadaan bias induktif lokal bawaan menyebabkan ViT bersifat sangat lapar data (\textit{data-hungry}), sehingga rentan mengalami kegagalan generalisasi atau konvergensi suboptimal apabila dilatih dari awal (\textit{from scratch}) pada dataset citra medis berukuran terbatas seperti DermaMNIST-C tanpa inisialisasi bobot prapelatihan berskala masif. \par
+
+\subsection{Arsitektur Residual Networks (ResNet)} \label{II.Teori.ResNet}
+Sebagai arsitektur kanonikal yang mewakili paradigma konvolusional modern, \textit{Residual Networks} (ResNet) \cite{he2016deep} mengatasi masalah degradasi akurasi (\textit{degradation problem}) pada jaringan yang sangat dalam. Fenomena degradasi ini ditandai oleh saturasi akurasi yang diikuti penurunan tajam performa seiring bertambahnya kedalaman jaringan, yang bukan diakibatkan oleh \textit{overfitting}, melainkan oleh kendala optimasi akibat hilangnya gradien (\textit{vanishing gradient}) saat propagasi balik melalui rantai perkalian bobot berulang \cite{he2016deep}. \par
+
+He et al. (2016) \cite{he2016deep} merumuskan solusi melalui konsep pembelajaran residual (\textit{deep residual learning}). Alih-alih mengoptimalkan pemetaan target laten $\mathcal{H}(\mathbf{x})$ secara langsung dari tumpukan lapisan non-linier, lapisan tersebut dipaksa mempelajari fungsi residual $\mathcal{F}(\mathbf{x}) = \mathcal{H}(\mathbf{x}) - \mathbf{x}$. Fungsi luaran akhir disusun melalui penambahan koneksi jalan pintas identitas (\textit{identity shortcut connection}):
+\begin{equation}
+	\mathbf{y} = \mathcal{F}(\mathbf{x}, \{W_i\}) + \mathbf{x}
+\end{equation}
+\myequations{Pemetaan Residual Identitas ResNet}
+di mana $\mathbf{x}$ dan $\mathbf{y}$ masing-masing merepresentasikan vektor masukan dan keluaran dari blok residual yang dievaluasi, dan $\mathcal{F}(\mathbf{x}, \{W_i\})$ menyatakan pemetaan residual konvolusional yang dipelajari. Apabila terjadi diskrepansi dimensi kanal atau resolusi spasial antara masukan dan keluaran, koneksi pintas diproyeksikan secara linier menggunakan matriks $W_s$:
+\begin{equation}
+	\mathbf{y} = \mathcal{F}(\mathbf{x}, \{W_i\}) + W_s \mathbf{x}
+\end{equation}
+\myequations{Pemetaan Residual Proyeksi Linier ResNet}
+Secara analitis, formulasi ini memungkinkan gradien kesalahan dari lapisan atas mengalir langsung tanpa hambatan ke lapisan awal melalui operator identitas ($\frac{\partial \mathcal{E}}{\partial \mathbf{x}} = \frac{\partial \mathcal{E}}{\partial \mathbf{y}} \left( \frac{\partial \mathcal{F}}{\partial \mathbf{x}} + \mathbf{I} \right)$), memfasilitasi konvergensi jaringan hingga puluhan maupun ratusan lapisan. \par
+
+Struktur blok penyusun keluarga ResNet terbagi menjadi dua konfigurasi utama berdasarkan kedalamannya:
+\begin{enumerate}[noitemsep]
+	\item \textbf{\textit{Basic Residual Block}} (diimplementasikan pada ResNet-18 dan ResNet-34): Tersusun atas dua lapisan konvolusi berukuran $3 \times 3$ yang masing-masing diikuti oleh normalisasi tumpak (\textit{Batch Normalization}) dan fungsi aktivasi non-linier ReLU. Blok ini menjaga beban komputasi tetap proporsional pada skala parameter yang ringkas.
+	\item \textbf{\textit{Bottleneck Residual Block}} (diimplementasikan pada ResNet-50, ResNet-101, dan ResNet-152): Dirancang khusus untuk menekan kebutuhan komputasi FLOPs dan parameter pada kedalaman tinggi melalui struktur tiga lapisan bertingkat: konvolusi $1 \times 1$ untuk mereduksi dimensi kanal (\textit{squeeze}), konvolusi $3 \times 3$ untuk ekstraksi fitur spasial pada ruang berdimensi terkompresi, dan konvolusi $1 \times 1$ untuk merestorasi dimensi kanal (\textit{expand}) sebelum dijumlahkan dengan jalur \textit{residual shortcut}.
+\end{enumerate}
+
+Dalam penelitian ini, keluarga ResNet ditetapkan sebagai \textit{external scale-matched baseline} berparadigma konvolusi murni untuk menguji apakah keunggulan komputasi dan akurasi MedMamba konsisten di setiap tingkatan skala parameter. Tiga varian ResNet dipilih secara presisi berdasarkan kedekatan kapasitas parameternya:
+\begin{itemize}[noitemsep]
+	\item \textbf{ResNet-18} ($\sim$11,2M parameter, 8 blok residual dasar) sebagai pembanding terhadap \textbf{MedMamba-T} ($\sim$14,5M parameter).
+	\item \textbf{ResNet-50} ($\sim$23,5M parameter, 16 blok residual \textit{bottleneck}) sebagai pembanding terhadap \textbf{MedMamba-S} ($\sim$22,8M parameter).
+	\item \textbf{ResNet-101} ($\sim$44,5M parameter, 33 blok residual \textit{bottleneck}) sebagai pembanding terhadap \textbf{MedMamba-B} ($\sim$47,1M parameter).
+\end{itemize}
+
+\subsection{Arsitektur State Space Models (SSM) dan MedMamba} \label{II.Teori.MedMamba}
 \subsubsection{State Space Models (SSM)}
 \textit{State Space Models} (SSM) memodelkan sistem dinamik sekuensial kontinu yang memetakan sinyal masukan $x(t) \in \mathbb{R}$ ke keluaran $y(t) \in \mathbb{R}$ melalui variabel keadaan laten tersembunyi $h(t) \in \mathbb{R}^D$ dengan matriks evolusi $\mathbf{A} \in \mathbb{R}^{D \times D}$, vektor proyeksi masukan $\mathbf{B} \in \mathbb{R}^{D \times 1}$, dan vektor pembaca keluaran $\mathbf{C} \in \mathbb{R}^{1 \times D}$:
-\begin{align}
-	h'(t) &= \mathbf{A} h(t) + \mathbf{B} x(t) \\
-	y(t) &= \mathbf{C} h(t)
-\end{align}
+\begin{equation}
+	\begin{aligned}
+		h'(t) &= \mathbf{A} h(t) + \mathbf{B} x(t) \\
+		y(t) &= \mathbf{C} h(t)
+	\end{aligned}
+\end{equation}
+\myequations{Sistem Persamaan Keadaan Laten Kontinu SSM}
 Untuk pemrosesan data diskrit digital, sistem kontinu di atas didiskretisasi menggunakan aturan \textit{Zero-Order Hold} (ZOH) dengan parameter langkah waktu (\textit{step size}) $\mathbf{\Delta}$:
-\begin{align}
-	\mathbf{\bar{A}} &= \exp(\mathbf{\Delta} \mathbf{A}) \\
-	\mathbf{\bar{B}} &= (\mathbf{\Delta} \mathbf{A})^{-1} (\mathbf{\bar{A}} - \mathbf{I}) \cdot (\mathbf{\Delta} \mathbf{B}) \\
-	h_t &= \mathbf{\bar{A}} h_{t-1} + \mathbf{\bar{B}} x_t \\
-	y_t &= \mathbf{C} h_t
-\end{align}
+\begin{equation}
+	\begin{aligned}
+		\mathbf{\bar{A}} &= \exp(\mathbf{\Delta} \mathbf{A}) \\
+		\mathbf{\bar{B}} &= (\mathbf{\Delta} \mathbf{A})^{-1} (\mathbf{\bar{A}} - \mathbf{I}) \cdot (\mathbf{\Delta} \mathbf{B}) \\
+		h_t &= \mathbf{\bar{A}} h_{t-1} + \mathbf{\bar{B}} x_t \\
+		y_t &= \mathbf{C} h_t
+	\end{aligned}
+\end{equation}
+\myequations{Diskretisasi State Space Model dengan Zero-Order Hold}
 
 Keunggulan utama arsitektur \textbf{Mamba} terletak pada pengenalan \textit{Selective Scan Mechanism} (S6) \cite{gu2024mamba}. Berbeda dengan model SSM linier statis terdahulu (seperti S4) di mana parameter $\mathbf{A}, \mathbf{B}, \mathbf{C}$ bersifat konstan invarian waktu (\textit{Linear Time-Invariant}), Mamba merumuskan parameter $\mathbf{B}$, $\mathbf{C}$, dan $\mathbf{\Delta}$ sebagai fungsi terbobot langsung dari token masukan $x_t$:
-\begin{align}
-	\mathbf{B}_t &= \text{Linear}_N(x_t), \quad \mathbf{C}_t = \text{Linear}_N(x_t) \\
-	\mathbf{\Delta}_t &= \text{softplus}(\text{Parameter} + \text{Linear}_D(x_t))
-\end{align}
+\begin{equation}
+	\begin{aligned}
+		\mathbf{B}_t &= \text{Linear}_N(x_t), \quad \mathbf{C}_t = \text{Linear}_N(x_t) \\
+		\mathbf{\Delta}_t &= \text{softplus}(\text{Parameter} + \text{Linear}_D(x_t))
+	\end{aligned}
+\end{equation}
+\myequations{Mekanisme Seleksi Parameter Masukan Mamba S6}
 Mekanisme seleksi adaptif ini memungkinkan model menyaring informasi relevan dan melupakan informasi yang tidak penting di sepanjang sekuens dengan kompleksitas komputasi linear $\mathcal{O}(N)$ \cite{gu2024mamba}.
 
 \subsubsection{MedMamba}
@@ -208,10 +250,12 @@ Paradigma \textit{Supervised Contrastive Learning} \cite{khosla2020supervised} m
 \begin{equation}
 	z_i = \frac{g(f(\tilde{x}_i))}{\|g(f(\tilde{x}_i))\|_2}
 \end{equation}
+\myequations{Normalisasi Vektor Proyeksi Laten SupCon}
 Fungsi kerugian SupCon ($\mathcal{L}_{SupCon}$) memaksimalkan dot-product pasangan sampel dari kelas yang sama dan meminimalkan dot-product pasangan sampel dari kelas berbeda:
 \begin{equation}
 	\mathcal{L}_{SupCon} = \sum_{i \in I} \frac{-1}{|P(i)|} \sum_{p \in P(i)} \log \frac{\exp(z_i \cdot z_p / \tau)}{\sum_{a \in A(i)} \exp(z_i \cdot z_a / \tau)}
 \end{equation}
+\myequations{Fungsi Kerugian Supervised Contrastive (SupCon)}
 di mana $I \equiv \{1, \dots, 2N\}$ adalah indeks seluruh tampilan teraugmentasi dalam batch, $A(i) \equiv I \setminus \{i\}$, $P(i) \equiv \{p \in A(i) : y_p = y_i\}$ adalah himpunan indeks sampel yang memiliki label diagnosis identik dengan sampel $i$, $|P(i)|$ menyatakan kardinalitas himpunan positif, dan $\tau > 0$ adalah parameter temperatur ($\tau = 0,07$). Pada tahap kedua, \textit{projection head} dibuang dan lapisan klasifikasi linier dipasang di atas representasi fitur beku (\textit{frozen}) atau di-fine-tune untuk memprediksi label diagnosis.
 
 \subsection{Metrik Evaluasi, Kalibrasi, dan Efisiensi Komputasi} \label{II.Teori.Evaluasi}
@@ -219,29 +263,66 @@ Kinerja arsitektur diukur secara menyeluruh melalui tiga pilar evaluasi:
 
 \subsubsection{Metrik Kinerja Diagnostik Multikelas}
 Berdasarkan nilai matriks kontingensi multikelas (\textit{Confusion Matrix}), dihitung metrik berikut untuk menghindari bias populasi mayoritas \cite{grandini2020metrics}:
-\begin{align}
-	\text{Balanced Accuracy} &= \frac{1}{K} \sum_{k=1}^{K} \frac{TP_k}{TP_k + FN_k} \\
-	\text{Macro Precision} &= \frac{1}{K} \sum_{k=1}^{K} \frac{TP_k}{TP_k + FP_k} \\
-	\text{Macro F1-Score} &= \frac{1}{K} \sum_{k=1}^{K} \frac{2 \cdot \text{Precision}_k \cdot \text{Recall}_k}{\text{Precision}_k + \text{Recall}_k}
-\end{align}
+\begin{equation}
+	\text{Balanced Accuracy} = \frac{1}{K} \sum_{k=1}^{K} \frac{TP_k}{TP_k + FN_k}
+\end{equation}
+\myequations{Balanced Accuracy Multikelas}
+
+\begin{equation}
+	\text{Macro Precision} = \frac{1}{K} \sum_{k=1}^{K} \frac{TP_k}{TP_k + FP_k}
+\end{equation}
+\myequations{Macro Precision Multikelas}
+
+\begin{equation}
+	\text{Macro F1-Score} = \frac{1}{K} \sum_{k=1}^{K} \frac{2 \cdot \text{Precision}_k \cdot \text{Recall}_k}{\text{Precision}_k + \text{Recall}_k}
+\end{equation}
+\myequations{Macro F1-Score Multikelas}
 Selain itu, dihitung \textit{Multiclass Matthews Correlation Coefficient} (MCC) menurut formulasi Gorodkin (2004) \cite{gorodkin2004mcc}:
 \begin{equation}
 	\text{MCC} = \frac{C \cdot N - \sum_{k=1}^{K} p_k t_k}{\sqrt{\left(N^2 - \sum_{k=1}^{K} p_k^2\right) \left(N^2 - \sum_{k=1}^{K} t_k^2\right)}}
 \end{equation}
+\myequations{Multiclass Matthews Correlation Coefficient}
 di mana $K$ adalah jumlah kelas ($K=7$), $N$ adalah total sampel uji, $C = \sum_{k=1}^K TP_k$ adalah total prediksi benar, $p_k = \sum_{j=1}^K M_{jk}$ adalah total sampel yang diprediksi ke kelas $k$, dan $t_k = \sum_{j=1}^K M_{kj}$ adalah total sampel aktual kelas $k$. MCC memberikan skor pada rentang $[-1, +1]$ dan bersifat tahan (\textit{robust}) terhadap ketidakseimbangan kelas ekstrem.
 
 \subsubsection{Metrik Reliabilitas Kalibrasi Prediksi}
-Untuk mengevaluasi apakah tingkat kepastian (\textit{confidence score}) selaras dengan probabilitas kebenaran prediksi klinis, diukur \textit{Expected Calibration Error} (ECE) \cite{guo2017calibration}:
-\begin{equation}
-	\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|
-\end{equation}
-di mana sampel dikelompokkan ke dalam $M$ bin interval kepercayaan yang terbagi rata ($M=10$), dengan $\text{acc}(B_m)$ dan $\text{conf}(B_m)$ masing-masing merepresentasikan akurasi dan rata-rata skor kepercayaan di dalam bin $B_m$.
+Untuk mengevaluasi apakah tingkat kepastian (\textit{confidence score}) selaras dengan probabilitas kebenaran prediksi klinis, dievaluasi dua metrik kalibrasi probabilistik:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Expected Calibration Error (ECE)} \cite{guo2017calibration}: Mengukur rata-rata selisih absolut terbobot antara tingkat kepercayaan prediksi dengan akurasi aktual sampel yang dikelompokkan ke dalam $M$ interval bin yang terbagi rata ($M=10$):
+	\begin{equation}
+		\text{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|
+	\end{equation}
+	\myequations{Expected Calibration Error}
+	di mana $\text{acc}(B_m)$ dan $\text{conf}(B_m)$ masing-masing merepresentasikan akurasi dan rata-rata skor kepercayaan di dalam bin $B_m$.
+
+	\item \textbf{Brier Score} \cite{brier1950verification}: Mengukur kesalahan kuadrat rata-rata antara vektor probabilitas keluaran model dengan representasi biner \textit{one-hot} label \textit{ground-truth}:
+	\begin{equation}
+		\text{Brier Score} = \frac{1}{N} \sum_{i=1}^{N} \sum_{k=1}^{K} \left(\hat{p}_{i,k} - y_{i,k}\right)^2
+	\end{equation}
+	\myequations{Brier Score Kalibrasi Probabilistik}
+	di mana $N$ menyatakan total sampel uji, $K$ adalah jumlah kelas ($K=7$), $\hat{p}_{i,k} \in [0, 1]$ adalah probabilitas prediksi untuk kelas $k$ pada sampel $i$, dan $y_{i,k} \in \{0, 1\}$ adalah indikator ground-truth.
+\end{enumerate}
 
 \subsubsection{Metrik Efisiensi Komputasi Hardware}
-Metrik komputasi fisik mencakup:
-\begin{itemize}[noitemsep]
-	\item \textbf{Jumlah Parameter (M)}: Total parameter terbobot jaringan saraf tiruan.
-	\item \textbf{Giga Floating Point Operations (GFLOPs)}: Total operasi titik kambang untuk memproses satu citra masukan $224 \times 224 \times 3$.
-	\item \textbf{Latensi Inferensi (\textit{Inference Latency})}: Waktu eksekusi rata-rata per citra pada ukuran batch=1 dalam satuan milidetik (ms).
-	\item \textbf{Konsumsi Memori VRAM Puncak (\textit{Peak VRAM})}: Alokasi memori GPU maksimal selama proses propagasi maju dan mundur dalam satuan Megabyte (MB) atau Gigabyte (GB).
-\end{itemize}
+Evaluasi komputasi fisik mencakup pemodelan beban komputasi teoritis dan profil performa perangkat keras:
+\begin{enumerate}[noitemsep]
+	\item \textbf{Jumlah Parameter ($M_{\text{param}}$)}: Akumulasi parameter terbobot jaringan yang dihitung dari total elemen tensor bobot dan bias pada seluruh lapisan $L$:
+	\begin{equation}
+		M_{\text{param}} = \frac{1}{10^6} \sum_{l=1}^{L} \left( \text{numel}(W_l) + \text{numel}(b_l) \right)
+	\end{equation}
+	\myequations{Akumulasi Jumlah Parameter Terbobot}
+
+	\item \textbf{Giga Floating Point Operations (GFLOPs)}: Total operasi aritmatika titik kambang (perkalian dan penjumlahan) yang dieksekusi selama propagasi maju untuk memproses satu citra masukan berdimensi $224 \times 224 \times 3$:
+	\begin{equation}
+		\text{GFLOPs} = \frac{\text{Total FLOPs}}{10^9}
+	\end{equation}
+	\myequations{Normalisasi Satuan Komputasi GFLOPs}
+
+	\item \textbf{Throughput Inferensi}: Kecepatan pemrosesan citra per satuan waktu yang dihitung pada ukuran batch penuh saat inferensi:
+	\begin{equation}
+		\text{Throughput} = \frac{N_{\text{batch}}}{T_{\text{inferensi}}} \quad (\text{citra/detik})
+	\end{equation}
+	\myequations{Throughput Inferensi Perangkat Keras}
+
+	\item \textbf{Latensi Inferensi (\textit{Inference Latency})}: Waktu eksekusi rata-rata propagasi maju per citra pada ukuran batch=1 dalam satuan milidetik (ms).
+	\item \textbf{Konsumsi Memori VRAM Puncak (\textit{Peak VRAM})}: Alokasi memori GPU maksimal selama siklus pelatihan (propagasi maju dan propagasi balik gradien) dalam satuan Megabyte (MB) atau Gigabyte (GB).
+\end{enumerate}

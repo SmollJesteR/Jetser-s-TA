@@ -34,7 +34,12 @@ Riding on the shoulders of giants (a.k.a. copied the structure from):
 
 ## 📅 Log of Suffering & Small Wins
 
+### 2026-11-05
+- Memperbaiki diagram alir penelitian (`flowchart_generator.tex` & `Diagram Alur.jpeg`): menyederhanakan konten menjadi hanya judul tahapan utama serta menyempurnakan geometri dan tata letak posisi *justify* rata kanan-kiri simetris agar tidak terpotong.
+- Menambahkan gambar arsitektur model MedMamba (`medmamba.jpeg` / `medmamba.jpg`) di bawah Subbab 3.4.1 (Spesifikasi Arsitektur Model MedMamba) serta memperbarui Daftar Gambar.
+- Menyesuaikan visualisasi sampel citra dermatoskopi tiap kelas pada Bab II.
+- Mengompilasi ulang seluruh dokumen utama `thesis.pdf` secara bersih (61 halaman) dengan sinkronisasi penomoran gambar, persamaan, dan sitasi.
+
 ### 2026-07-21
 - Menghapus folder template lama "Template TA 2025 - Versi A4" dari workspace.
 - Menyinkronkan perubahan lokal ke repository GitHub dan mencatat progress hari ini di README.
-
